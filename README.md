@@ -14,7 +14,7 @@ $ java -jar target/simulation-0.0.0-jar-with-dependencies.jar
 
 *This will remove the "target" directory*
 
-From the project root
+From the project root:
 
 ```bash
 $ mvn clean
