@@ -1,4 +1,4 @@
-package mbpmcsn.center.process.rvg;
+package mbpmcsn.process.rvg;
 
 import mbpmcsn.desbook.Rngs;
 

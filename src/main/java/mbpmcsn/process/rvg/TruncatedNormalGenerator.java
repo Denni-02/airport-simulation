@@ -1,9 +1,9 @@
-package mbpmcsn.center.process.rvg;
+package mbpmcsn.process.rvg;
 
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.desbook.Rvms;
 
-public class TruncatedNormalGenerator implements RandomVariateGenerator {
+public final class TruncatedNormalGenerator implements RandomVariateGenerator {
 	private final double mean;
 	private final double devstd;
 	private final double lowerBound;
