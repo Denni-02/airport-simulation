@@ -13,12 +13,12 @@ public final class ErlangGenerator implements RandomVariateGenerator {
 
 	@Override
 	public double generate(Rngs rngs) {
-        double x = 0;
+		double x = 0;
 
-        for (long i = 0; i < k; i++) {
-            x += Commons.exponential(b, rngs);
-        }
+		for (long i = 0; i < k; i++) {
+			x += Commons.exponential(b, rngs);
+		}
 
-        return x;
+		return x;
 	}
 }

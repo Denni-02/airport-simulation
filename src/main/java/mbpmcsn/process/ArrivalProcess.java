@@ -13,7 +13,7 @@ public final class ArrivalProcess extends Process {
 	public double getArrival() {
 		rngs.selectStream(streamIdx);
 		sarrival += rvg.generate(rngs);
-        return sarrival;
+		return sarrival;
 	}
 }
 
