@@ -2,6 +2,11 @@ package mbpmcsn.center;
 
 import mbpmcsn.process.ServiceProcess;
 
+/**
+ * m parallel servers and a single FIFO queue
+ * jobs wait in the queue only if all m servers are busy
+ */
+
 public class MultiServerSingleQueue extends Center {
 	private final int numServers;
 

@@ -3,6 +3,14 @@ package mbpmcsn.process;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.process.rvg.RandomVariateGenerator;
 
+/**
+ * abstract base class for all stochastic processes in the simulation
+ * links a specific Random Number Generator stream (Rngs)
+ * with a specific probability distribution (RandomVariateGenerator)
+ * to ensures that every process (arrivals, service) has its own independent
+ * sequence of random numbers.
+ */
+
 class Process {
 	protected final Rngs rngs;
 	protected final int streamIdx;
