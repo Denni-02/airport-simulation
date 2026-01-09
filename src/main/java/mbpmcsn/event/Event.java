@@ -1,39 +1,50 @@
 package mbpmcsn.event;
 
-public class Event {
+import mbpmcsn.center.Center;
+import mbpmcsn.entity.Job;
 
-	/* event types for each center */
-	public enum Type {
-		ARRIVAL,
-		DEPARTURE 
-	}
+/**
+ * Represents a discrete event in the simulation.
+ */
 
-	/* time at which event happens */
-	private final double t;
+public class Event implements Comparable<Event> {
 
-	/* event type */
-	private final Event.Type x;
+	private final double t; // time at which event happens
+	private final EventType type; // event type
+	private final Job job;
+	private final Center targetCenter; // center where this event happens
 
 	/* optional/arbitrary data that can be passed to
 	 * center.onArrival and center.onCompletion,
 	 * these data may be needed for event handling */
 	private final Object args;
 
-	public Event(double t, Event.Type x, Object args) {
+	public Event(double t, EventType type, Center targetCenter, Job job, Object args) {
 		this.t = t;
-		this.x = x;
+		this.type = type;
+		this.targetCenter = targetCenter;
+		this.job = job;
 		this.args = args;
 	}
 
-	public double getT() {
+	public double getTime() {
 		return t;
 	}
-
-	public Event.Type getX() {
-		return x;
-	}
-
+	public EventType getType() { return type; }
+	public Center getTargetCenter() { return targetCenter; }
+	public Job getJob() { return job; }
 	public Object getArgs() {
 		return args;
+	}
+
+	@Override
+	public int compareTo(Event other) {
+		return Double.compare(this.t, other.t);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Event[t=%.4f, type=%s, center=%s, job=%s]",
+				t, type, (targetCenter != null ? targetCenter.getClass().getSimpleName() : "None"), job);
 	}
 }
