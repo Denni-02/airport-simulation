@@ -26,6 +26,8 @@ public class InfiniteServer extends Center {
 		numJobsInNode++;
 
 		double now = eventQueue.getCurrentClock();
+		collectTimeStats(now);
+
 		double svc = serviceProcess.getService();
 		Job job = event.getJob();
 
@@ -33,8 +35,6 @@ public class InfiniteServer extends Center {
 				now + svc, EventType.DEPARTURE, this, job, null);
 
 		eventQueue.add(departureEvent);
-
-		collectTimeStats(now);
 	}
 
 	@Override
@@ -42,6 +42,8 @@ public class InfiniteServer extends Center {
 		numJobsInNode--;
 
 		double now = eventQueue.getCurrentClock();
+		collectTimeStats(now);
+
 		Job job = event.getJob();
 		Center nextCenter = getNextCenter(job);
 
@@ -49,8 +51,6 @@ public class InfiniteServer extends Center {
 				now, EventType.ARRIVAL, nextCenter, job, null);
 
 		eventQueue.add(arrivalEvent);
-
-		collectTimeStats(now);
 	}
 	
 	@Override
