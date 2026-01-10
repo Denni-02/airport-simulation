@@ -1,6 +1,7 @@
 package mbpmcsn.center;
 
 import mbpmcsn.desbook.Rngs;
+import mbpmcsn.entity.Job;
 
 /**
  * determines the next destination of a job after completing service
@@ -8,5 +9,8 @@ import mbpmcsn.desbook.Rngs;
  */
 
 public interface NetworkRoutingPoint {
-	Center getNextCenter(Rngs rngs, int streamIdx);
+	/* passing job allows to change attributes of the incoming job,
+	 * that is, domain-specific infos, e.g. checkedBaggage, determined
+	 * by probabilities */
+	Center getNextCenter(Rngs rngs, Job job);
 }

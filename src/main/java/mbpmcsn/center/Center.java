@@ -3,7 +3,9 @@ package mbpmcsn.center;
 import mbpmcsn.process.ServiceProcess;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.event.Event;
+import mbpmcsn.event.EventQueue;
 import mbpmcsn.stats.StatCollector;
+import mbpmcsn.entity.Job;
 
 /**
  * abstract base class representing a generic node in the queueing network
@@ -21,7 +23,12 @@ public abstract class Center {
 	protected long numJobsInNode;
 	protected double lastUpdateTime;
 
-	protected Center(int id, String name, ServiceProcess serviceProcess, NetworkRoutingPoint networkRoutingPoint) {
+	protected Center(
+			int id, 
+			String name, 
+			ServiceProcess serviceProcess, 
+			NetworkRoutingPoint networkRoutingPoint) {
+
 		this.id = id;
 		this.name = name;
 		this.serviceProcess = serviceProcess;
@@ -50,16 +57,20 @@ public abstract class Center {
 	 * within onCompletion() to decide the next center
 	 * to generate the arrival event for, based on the
 	 * routing matrix */
-	protected final Center getNextCenter() {
+	protected final Center getNextCenter(Job job) {
 		Rngs rngs = serviceProcess.getRngs();
 		int streamIdx = serviceProcess.getStreamIdx() + 1;
-		return networkRoutingPoint.getNextCenter(rngs, streamIdx);
+		rngs.selectStream(streamIdx);
+		return networkRoutingPoint.getNextCenter(rngs, job);
 	}
 
 	/* called by event handler */
-	public abstract void onArrival(Event event);
+	public abstract void onArrival(Event event, EventQueue eventQueue);
 
 	/* called by event handler */
-	public abstract void onCompletion(Event event);
+	public abstract void onDeparture(Event event, EventQueue eventQueue);
+
+	/* called by event handler */
+	public abstract void onSampling(Event event, EventQueue eventQueue);
 }
 

@@ -9,15 +9,10 @@ import java.util.PriorityQueue;
 public class EventQueue {
 
     // data struct for the queue
-    private final PriorityQueue<Event> queue;
+    private final PriorityQueue<Event> queue = new PriorityQueue<>();
 
     // time of the last processed event
     private double currentClock;
-
-    public EventQueue() {
-        this.queue = new PriorityQueue<>();
-        this.currentClock = 0.0;
-    }
 
     // adds a new event to the queue in the correct time order
     public void add(Event e) {
@@ -49,12 +44,6 @@ public class EventQueue {
     // indicates if the queue is empty
     public boolean isEmpty() {
         return queue.isEmpty();
-    }
-
-    // clear all
-    public void clear() {
-        queue.clear();
-        currentClock = 0.0;
     }
 
     public double getCurrentClock() {
