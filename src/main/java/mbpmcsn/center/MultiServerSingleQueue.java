@@ -8,6 +8,8 @@ import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
+import mbpmcsn.routing.NetworkRoutingPoint;
+import mbpmcsn.stats.StatCollector;
 
 /**
  * m parallel servers and a single FIFO queue
@@ -26,10 +28,11 @@ public class MultiServerSingleQueue extends Center {
 			int id, 
 			String name, 
 			ServiceProcess serviceProcess, 
-			NetworkRoutingPoint networkRoutingPoint, 
+			NetworkRoutingPoint networkRoutingPoint,
+			StatCollector statCollector,
 			int numServers) {
 
-		super(id, name, serviceProcess, networkRoutingPoint);
+		super(id, name, serviceProcess, networkRoutingPoint, statCollector);
 		this.numServers = numServers;
 	}
 

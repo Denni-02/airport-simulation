@@ -1,4 +1,6 @@
-package mbpmcsn.center;
+package mbpmcsn.routing;
+
+import mbpmcsn.center.SssqStatus;
 
 import java.util.List;
 

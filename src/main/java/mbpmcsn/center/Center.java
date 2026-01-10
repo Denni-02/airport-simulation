@@ -4,6 +4,7 @@ import mbpmcsn.process.ServiceProcess;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;
+import mbpmcsn.routing.NetworkRoutingPoint;
 import mbpmcsn.stats.StatCollector;
 import mbpmcsn.entity.Job;
 
@@ -18,7 +19,7 @@ public abstract class Center {
 
 	protected final ServiceProcess serviceProcess;
 	private final NetworkRoutingPoint networkRoutingPoint;
-	private final StatCollector statCollector = new StatCollector();
+	private final StatCollector statCollector;
 
 	protected long numJobsInNode;
 	protected double lastUpdateTime;
@@ -27,12 +28,14 @@ public abstract class Center {
 			int id, 
 			String name, 
 			ServiceProcess serviceProcess, 
-			NetworkRoutingPoint networkRoutingPoint) {
+			NetworkRoutingPoint networkRoutingPoint,
+			StatCollector statCollector) {
 
 		this.id = id;
 		this.name = name;
 		this.serviceProcess = serviceProcess;
 		this.networkRoutingPoint = networkRoutingPoint;
+		this.statCollector = statCollector;
 	}
 
 	protected void collectTimeStats(double currentClock) {

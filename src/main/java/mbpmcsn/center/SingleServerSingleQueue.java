@@ -8,6 +8,8 @@ import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
+import mbpmcsn.routing.NetworkRoutingPoint;
+import mbpmcsn.stats.StatCollector;
 
 /**
  * 1 server and a single FIFO queue
@@ -18,12 +20,13 @@ public class SingleServerSingleQueue extends Center {
 	private Queue<Job> jobQueue = new LinkedList<>();
 
 	public SingleServerSingleQueue(
-			int id, 
-			String name, 
-			ServiceProcess serviceProcess, 
-			NetworkRoutingPoint networkRoutingPoint) {
+			int id,
+			String name,
+			ServiceProcess serviceProcess,
+			NetworkRoutingPoint networkRoutingPoint,
+			StatCollector statCollector) {
 
-		super(id, name, serviceProcess, networkRoutingPoint);
+		super(id, name, serviceProcess, networkRoutingPoint, statCollector);
 	}
 
 	@Override

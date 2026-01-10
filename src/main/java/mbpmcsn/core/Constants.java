@@ -11,6 +11,23 @@ public final class Constants {
     // --- Simulation Control ---
     public static final long SEED = 123456789L;
 
+    public static final int STREAM_ARRIVALS      = 0;
+
+    public static final int STREAM_S1_SERVICE    = 10;
+
+    public static final int STREAM_S2_SERVICE    = 20;
+    public static final int STREAM_S2_ROUTING    = 21; // SQF
+
+    public static final int STREAM_S3_SERVICE    = 30;
+
+    public static final int STREAM_S4_SERVICE    = 40;
+    public static final int STREAM_S4_ROUTING    = 41; // trace/recupero
+
+    public static final int STREAM_S5_SERVICE    = 50;
+    public static final int STREAM_S5_ROUTING    = 51; // espulsione/recupero
+
+    public static final int STREAM_S6_SERVICE    = 60;
+
     // --- Topology Node IDs ---
     public static final int ID_INGRESSO = 0;       // Source
     public static final int ID_BANCHI_CHECKIN = 1;        // MSSQ
@@ -50,11 +67,11 @@ public final class Constants {
     public static final double MEAN_S3 = 90.0;
     public static final double STD_S3 = 30.0;
     public static final double LB3 = 30.0;
-    public static final double US3 = 210.0;
+    public static final double UB3 = 210.0;
 
     // --- Center 4: Controlli a Raggi X (MSMQ), Erlang-k (k=3) ---
     public static final int M4 = 6; // numero server centro 4
-    public static final int K = 3;
+    public static final int K4 = 3;
     public static final double MEAN_S4 = 60.0;
     public static final double LB4 = 30.0;
 
