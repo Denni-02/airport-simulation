@@ -46,6 +46,11 @@ public class EventQueue {
         return queue.isEmpty();
     }
 
+    // removes all the elements from the queue
+    public void clear(){
+        this.queue.clear();
+    }
+
     public double getCurrentClock() {
         return currentClock;
     }

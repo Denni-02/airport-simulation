@@ -9,6 +9,9 @@ import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
+import mbpmcsn.routing.FlowAssignmentPolicy;
+import mbpmcsn.routing.NetworkRoutingPoint;
+import mbpmcsn.stats.StatCollector;
 
 /**
  * m server, where each server has its own dedicated queue
@@ -27,11 +30,12 @@ public class MultiServerMultiQueue extends Center {
 			int id, 
 			String name, 
 			ServiceProcess serviceProcess, 
-			NetworkRoutingPoint networkRoutingPoint, 
+			NetworkRoutingPoint networkRoutingPoint,
+			StatCollector statCollector,
 			int numFlows,
 			FlowAssignmentPolicy flowAssignmentPolicy) {
 
-		super(id, name, serviceProcess, networkRoutingPoint);
+		super(id, name, serviceProcess, networkRoutingPoint, statCollector);
 		this.flowAssignmentPolicy = flowAssignmentPolicy;
 
 		for(int i = 0; i < numFlows; i++) {
