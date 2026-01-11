@@ -1,4 +1,4 @@
-package mbpmcsn.routing;
+package mbpmcsn.flowpolicy;
 
 import mbpmcsn.center.SssqStatus;
 

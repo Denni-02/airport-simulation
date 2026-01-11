@@ -1,10 +1,10 @@
-package mbpmcsn.routing;
+package mbpmcsn.flowpolicy;
 
 import mbpmcsn.center.SssqStatus;
 
 import java.util.List;
 
-public class RoundRobinPolicy implements FlowAssignmentPolicy {
+public final class RoundRobinPolicy implements FlowAssignmentPolicy {
 
     // index of the last selected queue, start from -1
     private int lastAssignedIndex = -1;

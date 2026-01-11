@@ -52,10 +52,6 @@ public abstract class Center {
 		return name;
 	}
 
-	public StatCollector getStatCollector() {
-		return statCollector;
-	}
-
 	/* utility method (wrapper) that should be used
 	 * within onCompletion() to decide the next center
 	 * to generate the arrival event for, based on the

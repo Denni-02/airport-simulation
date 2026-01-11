@@ -5,18 +5,19 @@ import mbpmcsn.desbook.Rngs;
 import mbpmcsn.entity.Job;
 import static mbpmcsn.core.Constants.P_DESK;
 
-/**
+/*
  * for the initial routing
  * check in or elettronic gates
  */
-public class EntryRouting implements NetworkRoutingPoint {
 
-    private Center checkIn;
-    private Center varchi;
+public final class EntryRouting implements NetworkRoutingPoint {
 
-    public void setDestinations(Center checkIn, Center varchi) {
-        this.checkIn = checkIn;
-        this.varchi = varchi;
+    private final Center checkIn;
+    private final Center varchi;
+
+    public EntryRouting(Center checkIn, Center varchi) {
+    	this.checkIn = checkIn;
+    	this.varchi = varchi;
     }
 
     @Override

@@ -4,17 +4,17 @@ import mbpmcsn.center.Center;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.entity.Job;
 
-/**
+/*
  * for fixed routing
  * es. Check-In --> Varchi Elettronici
  */
-public class FixedRouting implements NetworkRoutingPoint {
 
-    private Center nextCenter;
+public final class FixedRouting implements NetworkRoutingPoint {
 
-    // if nextCenter == null --> exit from the system (success)
-    public void setDestination(Center nextCenter) {
-        this.nextCenter = nextCenter;
+    private final Center nextCenter;
+
+    public FixedRouting(Center nextCenter) {
+    	this.nextCenter = nextCenter;
     }
 
     @Override

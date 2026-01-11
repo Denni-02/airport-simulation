@@ -9,7 +9,7 @@ import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
-import mbpmcsn.routing.FlowAssignmentPolicy;
+import mbpmcsn.flowpolicy.FlowAssignmentPolicy;
 import mbpmcsn.routing.NetworkRoutingPoint;
 import mbpmcsn.stats.StatCollector;
 

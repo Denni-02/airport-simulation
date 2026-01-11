@@ -9,6 +9,7 @@ import mbpmcsn.process.rvg.ErlangGenerator;
 import mbpmcsn.process.rvg.ExponentialGenerator;
 import mbpmcsn.process.rvg.TruncatedNormalGenerator;
 import mbpmcsn.routing.*;
+import mbpmcsn.flowpolicy.*;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.process.ArrivalProcess;
@@ -18,7 +19,7 @@ import java.util.List;
 
 import static mbpmcsn.core.Constants.*;
 
-/**
+/*
  * represents the simulation mind that initializes the model topology,
  * instantiates the centers and generators, and controls the
  * next-event time advance loop
@@ -31,12 +32,14 @@ public final class SimulationModel {
     private final StatCollector statCollector;
     private final Rngs rngs;
 
-    /* arrival and centers */
+    /* arrival */
     private ArrivalProcess arrivalProcess;
+
+    /* centers */
     private MultiServerSingleQueue checkInCenter;    // ID 1
     private MultiServerMultiQueue varchiCenter;      // ID 2
     private InfiniteServer prepCenter;               // ID 3
-    private MultiServerMultiQueue xrayCenter;        // ID 4
+    private MultiServerMultiQueue xRayCenter;        // ID 4
     private SingleServerSingleQueue traceCenter;     // ID 5
     private InfiniteServer recCenter;           // ID 6
 
@@ -47,59 +50,50 @@ public final class SimulationModel {
     private FixedRouting rCheckIn;
     private FixedRouting rVarchi;
     private FixedRouting rPrep;
-    private XRayRouting rXray;
+    private XRayRouting rXRay;
     private TraceRouting rTrace;
     private FixedRouting rRecupero;
 
-    public SimulationModel() {
-        this.rngs = new Rngs();
-        this.rngs.plantSeeds(SEED); // initializing global seed
-        this.eventQueue = new EventQueue();
-        this.statCollector = new StatCollector();
+    public SimulationModel(
+    		Rngs rngs, 
+    		EventQueue eventQueue, 
+    		StatCollector statCollector) {
 
-        setupNetwork();
-    }
+        this.rngs = rngs;
+        this.eventQueue = eventQueue;
+        this.statCollector = statCollector;
 
-    // constructor of the network
-    private void setupNetwork() {
-        createRoutingLogic();  // setting routing
-        createCenters(); // creating centers
-        connectNetwork(); // connecting centers
+        createRoutingLogic();
+        createArrivalProcess();
+        createCenters();
+        collectAllCenters();
     }
 
     private void createRoutingLogic() {
-        this.rIngresso = new EntryRouting();
-        this.rCheckIn  = new FixedRouting();
-        this.rVarchi   = new FixedRouting();
-        this.rPrep     = new FixedRouting();
-        this.rXray     = new XRayRouting();
-        this.rTrace    = new TraceRouting();
-        this.rRecupero = new FixedRouting();
+        rIngresso = new EntryRouting(checkInCenter, varchiCenter);
+        rCheckIn  = new FixedRouting(varchiCenter);
+        rVarchi   = new FixedRouting(prepCenter);
+        rPrep     = new FixedRouting(xRayCenter);
+        rXRay     = new XRayRouting(traceCenter, recCenter);
+        rTrace    = new TraceRouting(recCenter);
+        rRecupero = new FixedRouting(null);
     }
 
-    private void createCenters() {
-
-        // --- Setup Arrivals Generator  ---
-        this.arrivalProcess = new ArrivalProcess(
+    private void createArrivalProcess() {
+    	// --- Setup Arrivals Generator  ---
+        arrivalProcess = new ArrivalProcess(
                 new ExponentialGenerator(ARRIVAL_MEAN_TIME),
                 rngs, STREAM_ARRIVALS
         );
-        /**
-         * --- Setup Policies per le code ---
-         * SQF for elettronic gates
-         * Round Robin for XRay
-         */
-        FlowAssignmentPolicy sqfPolicy = new SqfPolicy(rngs, STREAM_S2_ROUTING);
-        FlowAssignmentPolicy rrPolicy = new RoundRobinPolicy();
+    }
 
-        // --- Cretion centers ---
-
+    private void createCenters() {
         // 1. Check-in
         ServiceProcess sp1 = new ServiceProcess(
                 new TruncatedNormalGenerator(MEAN_S1, STD_S1, LB1, UB1),
                 rngs, STREAM_S1_SERVICE
         );
-        this.checkInCenter = new MultiServerSingleQueue(
+        checkInCenter = new MultiServerSingleQueue(
                 ID_BANCHI_CHECKIN, "CheckIn", sp1, rCheckIn, statCollector, M1
         );
 
@@ -108,7 +102,8 @@ public final class SimulationModel {
                 new TruncatedNormalGenerator(MEAN_S2, STD_S2, LB2, UB2),
                 rngs, STREAM_S2_SERVICE
         );
-        this.varchiCenter = new MultiServerMultiQueue(
+        FlowAssignmentPolicy sqfPolicy = new SqfPolicy(rngs, STREAM_S2_ROUTING);
+        varchiCenter = new MultiServerMultiQueue(
                 ID_VARCHI_ELETTRONICI, "Varchi", sp2, rVarchi, statCollector, M2, sqfPolicy
         );
 
@@ -117,7 +112,7 @@ public final class SimulationModel {
                 new TruncatedNormalGenerator(MEAN_S3, STD_S3, LB3, UB3),
                 rngs, STREAM_S3_SERVICE
         );
-        this.prepCenter = new InfiniteServer(
+        prepCenter = new InfiniteServer(
                 ID_PREPARAZIONE_OGGETTI, "Preparazione", sp3, rPrep, statCollector
         );
 
@@ -126,8 +121,9 @@ public final class SimulationModel {
                 new ErlangGenerator(MEAN_S4, K4),
                 rngs, STREAM_S4_SERVICE
         );
-        this.xrayCenter = new MultiServerMultiQueue(
-                ID_XRAY, "XRay", sp4, rXray, statCollector, M4, rrPolicy
+        FlowAssignmentPolicy rrPolicy = new RoundRobinPolicy();
+        xRayCenter = new MultiServerMultiQueue(
+                ID_XRAY, "XRay", sp4, rXRay, statCollector, M4, rrPolicy
         );
 
         // 5. Trace Detection
@@ -135,7 +131,7 @@ public final class SimulationModel {
                 new TruncatedNormalGenerator(MEAN_S5, STD_S5, LB5, UB5),
                 rngs, STREAM_S5_SERVICE
         );
-        this.traceCenter = new SingleServerSingleQueue(
+        traceCenter = new SingleServerSingleQueue(
                 ID_TRACE_DETECTION , "TraceDetection", sp5, rTrace, statCollector
         );
 
@@ -144,28 +140,44 @@ public final class SimulationModel {
                 new TruncatedNormalGenerator(MEAN_S6, STD_S6, LB6, UB6),
                 rngs, STREAM_S6_SERVICE
         );
-        this.recCenter = new InfiniteServer(
+        recCenter = new InfiniteServer(
                 ID_RECUPERO_OGGETTI, "Recupero", sp6, rRecupero, statCollector
         );
+    }
 
+    private void collectAllCenters() {
         centers.add(checkInCenter);
         centers.add(varchiCenter);
         centers.add(prepCenter);
-        centers.add(xrayCenter);
+        centers.add(xRayCenter);
         centers.add(traceCenter);
         centers.add(recCenter);
     }
 
-    private void connectNetwork() {
-        rIngresso.setDestinations(checkInCenter, varchiCenter);
-        rCheckIn.setDestination(varchiCenter);
-        rVarchi.setDestination(prepCenter);
-        rPrep.setDestination(xrayCenter);
-        rXray.setDestinations(traceCenter, recCenter);
-        rTrace.setDestination(recCenter);
-        rRecupero.setDestination(null);
-    }
+    /* called from the runner */
+	public void planNextArrival() {
+		// calculate when a pax arrives (update sarrival)
+		double nextArrivalTime = arrivalProcess.getArrival();
 
+		// create the job associated to the pax
+		Job newJob = new Job(nextArrivalTime);
+
+		// initial routing: Check-in o Varchi?
+		Center firstCenter = rIngresso.getNextCenter(this.rngs, newJob);
+
+		// create event
+		Event arrivalEvent = new Event(
+				nextArrivalTime,
+				EventType.ARRIVAL,
+				firstCenter,
+				newJob,
+				null
+		);
+
+		eventQueue.add(arrivalEvent);
+	}
+
+	/* this should be moved to the runner */
     // run for a defined time
     public void run(double simulationTime) {
 
@@ -173,31 +185,31 @@ public final class SimulationModel {
         eventQueue.clear();
 
         // first arrival
-        arrivalProcess.planNextArrival(eventQueue, 0.0, rIngresso);
+        planNextArrival();
 
         // Next-Event loop
         while (eventQueue.getCurrentClock() < simulationTime) {
-
             if (eventQueue.isEmpty()) {
                 break;
             }
 
             // extract the upcoming event and process
-            mbpmcsn.event.Event e = eventQueue.pop();
+            Event e = eventQueue.pop();
 
             // new arrival
             if (e.getType() == EventType.ARRIVAL) {
                 if (e.getTime() == e.getJob().getArrivalTime()) {
-                    // new passegger
-                    arrivalProcess.planNextArrival(eventQueue, eventQueue.getCurrentClock(), rIngresso);
+                    planNextArrival();
                 }
             }
 
             processEvent(e);
         }
     }
+    /*--------------------------------*/
 
-    private void processEvent(mbpmcsn.event.Event e) {
+    /* called from the runner */
+    public void processEvent(Event e) {
         // center that manages the event
         Center target = e.getTargetCenter();
 
@@ -244,14 +256,7 @@ public final class SimulationModel {
          */
     }
 
-    public StatCollector getStatCollector() {
-        return statCollector;
-    }
-
     public List<Center> getCenters() {
         return centers;
     }
-
-
 }
-

@@ -1,4 +1,4 @@
-package mbpmcsn.routing;
+package mbpmcsn.flowpolicy;
 
 import mbpmcsn.center.SssqStatus;
 import mbpmcsn.desbook.Rngs;
@@ -6,7 +6,7 @@ import mbpmcsn.desbook.Rngs;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SqfPolicy implements FlowAssignmentPolicy {
+public final class SqfPolicy implements FlowAssignmentPolicy {
 
     private final Rngs rngs;
     private final int streamIndex;

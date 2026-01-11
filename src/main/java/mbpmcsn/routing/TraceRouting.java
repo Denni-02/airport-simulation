@@ -5,12 +5,12 @@ import mbpmcsn.desbook.Rngs;
 import mbpmcsn.entity.Job;
 import static mbpmcsn.core.Constants.P_FAIL;
 
-public class TraceRouting implements NetworkRoutingPoint {
+public final class TraceRouting implements NetworkRoutingPoint {
 
-    private Center recoveryCenter; /* destination if the
-                                    additional control is OK */
+	/* destination if the additional control is OK */
+    private final Center recoveryCenter;
 
-    public void setDestination(Center recoveryCenter) {
+    public TraceRouting(Center recoveryCenter) {
         this.recoveryCenter = recoveryCenter;
     }
 

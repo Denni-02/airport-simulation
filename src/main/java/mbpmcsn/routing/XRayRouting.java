@@ -8,12 +8,13 @@ import static mbpmcsn.core.Constants.P_CHECK;
 /*
 decides if the job has to do the extra security controls
  */
-public class XRayRouting implements NetworkRoutingPoint {
 
-    private Center traceDetection;
-    private Center recovery;
+public final class XRayRouting implements NetworkRoutingPoint {
 
-    public void setDestinations(Center traceDetection, Center recovery) {
+    private final Center traceDetection;
+    private final Center recovery;
+
+    public XRayRouting(Center traceDetection, Center recovery) {
         this.traceDetection = traceDetection;
         this.recovery = recovery;
     }
