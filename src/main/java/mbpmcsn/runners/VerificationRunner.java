@@ -6,6 +6,9 @@ package mbpmcsn.runners;
  * - compare simulation results with known analytical formulas
  */
 
-public final class VerificationRunner {
+public final class VerificationRunner implements Runner {
+	@Override
+	public void runIt() {
 
+	}
 }

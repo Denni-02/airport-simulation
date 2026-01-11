@@ -12,6 +12,7 @@ import mbpmcsn.entity.Job;
 import mbpmcsn.flowpolicy.FlowAssignmentPolicy;
 import mbpmcsn.routing.NetworkRoutingPoint;
 import mbpmcsn.stats.StatCollector;
+import mbpmcsn.stats.OnSamplingCallback;
 
 /**
  * m server, where each server has its own dedicated queue
@@ -32,10 +33,19 @@ public class MultiServerMultiQueue extends Center {
 			ServiceProcess serviceProcess, 
 			NetworkRoutingPoint networkRoutingPoint,
 			StatCollector statCollector,
+			OnSamplingCallback onSamplingCallback,
 			int numFlows,
 			FlowAssignmentPolicy flowAssignmentPolicy) {
 
-		super(id, name, serviceProcess, networkRoutingPoint, statCollector);
+		super(
+				id, 
+				name, 
+				serviceProcess, 
+				networkRoutingPoint, 
+				statCollector,
+				onSamplingCallback
+		);
+
 		this.flowAssignmentPolicy = flowAssignmentPolicy;
 
 		for(int i = 0; i < numFlows; i++) {
@@ -113,8 +123,8 @@ public class MultiServerMultiQueue extends Center {
 	}
 
 	@Override
-	public void onSampling(Event event, EventQueue eventQueue) {
-
+	public Object doSample() {
+		return null;
 	}
 
 	private void scheduleDepartureEvent(

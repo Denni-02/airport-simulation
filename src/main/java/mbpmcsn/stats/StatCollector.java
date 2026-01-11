@@ -13,7 +13,6 @@ public final class StatCollector {
     private final Map<String, PopulationStat> populationStats = new HashMap<>();
     private final Map<String, TimeStat> timeStats = new HashMap<>();
 
-    // is this really needed??
     public void clear() {
         populationStats.clear();
         timeStats.clear();

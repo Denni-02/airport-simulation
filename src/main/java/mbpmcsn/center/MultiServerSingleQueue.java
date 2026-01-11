@@ -10,6 +10,7 @@ import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
 import mbpmcsn.routing.NetworkRoutingPoint;
 import mbpmcsn.stats.StatCollector;
+import mbpmcsn.stats.OnSamplingCallback;
 
 /**
  * m parallel servers and a single FIFO queue
@@ -30,9 +31,18 @@ public class MultiServerSingleQueue extends Center {
 			ServiceProcess serviceProcess, 
 			NetworkRoutingPoint networkRoutingPoint,
 			StatCollector statCollector,
+			OnSamplingCallback onSamplingCallback,
 			int numServers) {
 
-		super(id, name, serviceProcess, networkRoutingPoint, statCollector);
+		super(
+				id, 
+				name, 
+				serviceProcess, 
+				networkRoutingPoint, 
+				statCollector,
+				onSamplingCallback
+		);
+
 		this.numServers = numServers;
 	}
 
@@ -81,8 +91,8 @@ public class MultiServerSingleQueue extends Center {
 	}
 
 	@Override
-	public void onSampling(Event event, EventQueue eventQueue) {
-
+	public Object doSample() {
+		return null;
 	}
 
 	private void scheduleDepartureEvent(
