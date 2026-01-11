@@ -9,22 +9,19 @@ public final class TraceRouting implements NetworkRoutingPoint {
 
 	/* destination if the additional control is OK */
     private final Center recoveryCenter;
+    private final int streamIndex;
 
-    public TraceRouting(Center recoveryCenter) {
+    public TraceRouting(Center recoveryCenter, int streamIndex) {
         this.recoveryCenter = recoveryCenter;
+        this.streamIndex = streamIndex;
     }
 
     @Override
     public Center getNextCenter(Rngs r, Job job) {
+    	r.selectStream(streamIndex);
 
-        if (r.random() < P_FAIL) {
-            // FAILURE: exit from the system
-            job.setSecurityCheckFailed(true);
-            return null;
-        } else {
-            // SUCCESS: go to recovery of personal objects
-            job.setSecurityCheckFailed(false);
-            return recoveryCenter;
-        }
+    	boolean isTracingFailed = r.random() < P_FAIL;
+    	job.setSecurityCheckFailed(isTracingFailed);
+    	return isTracingFailed ? null : recoveryCenter;
     }
 }

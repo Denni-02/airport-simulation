@@ -14,22 +14,20 @@ public final class EntryRouting implements NetworkRoutingPoint {
 
     private final Center checkIn;
     private final Center varchi;
+    private final int streamIndex;
 
-    public EntryRouting(Center checkIn, Center varchi) {
+    public EntryRouting(Center checkIn, Center varchi, int streamIndex) {
     	this.checkIn = checkIn;
     	this.varchi = varchi;
+    	this.streamIndex = streamIndex;
     }
 
     @Override
     public Center getNextCenter(Rngs r, Job job) {
-        if (r.random() < P_DESK) {
-            // go to check-in
-            job.setCheckedBaggage(true);
-            return checkIn;
-        } else {
-            // go to e-gates
-            job.setCheckedBaggage(false);
-            return varchi;
-        }
+    	r.selectStream(streamIndex);
+
+    	boolean goesToCheckIn = r.random() < P_DESK;
+    	job.setCheckedBaggage(goesToCheckIn);
+    	return goesToCheckIn ? checkIn : varchi;
     }
 }

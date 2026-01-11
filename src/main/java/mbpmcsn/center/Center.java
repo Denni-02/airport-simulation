@@ -52,14 +52,9 @@ public abstract class Center {
 		return name;
 	}
 
-	/* utility method (wrapper) that should be used
-	 * within onCompletion() to decide the next center
-	 * to generate the arrival event for, based on the
-	 * routing matrix */
+	/* wrapper method */
 	protected final Center getNextCenter(Job job) {
 		Rngs rngs = serviceProcess.getRngs();
-		int streamIdx = serviceProcess.getStreamIdx() + 1;
-		rngs.selectStream(streamIdx);
 		return networkRoutingPoint.getNextCenter(rngs, job);
 	}
 

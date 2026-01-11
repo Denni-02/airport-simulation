@@ -21,7 +21,7 @@ public final class SqfPolicy implements FlowAssignmentPolicy {
         int minSize = Integer.MAX_VALUE;
 
         // PHASE 1: find min size between queues
-        for (SssqStatus status : sssqs) {
+        for (final SssqStatus status : sssqs) {
             int currentSize = status.getQueue().size();
             if (currentSize < minSize) {
                 minSize = currentSize;

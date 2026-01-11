@@ -16,7 +16,7 @@ public final class Constants {
     public static final int STREAM_S1_SERVICE    = 10;
 
     public static final int STREAM_S2_SERVICE    = 20;
-    public static final int STREAM_S2_ROUTING    = 21; // SQF
+    public static final int STREAM_S2_FLOWPOL    = 21; // SQF
 
     public static final int STREAM_S3_SERVICE    = 30;
 

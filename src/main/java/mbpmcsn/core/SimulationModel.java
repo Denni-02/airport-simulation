@@ -70,12 +70,12 @@ public final class SimulationModel {
     }
 
     private void createRoutingLogic() {
-        rIngresso = new EntryRouting(checkInCenter, varchiCenter);
+        rIngresso = new EntryRouting(checkInCenter, varchiCenter, STREAM_ARRIVALS);
         rCheckIn  = new FixedRouting(varchiCenter);
         rVarchi   = new FixedRouting(prepCenter);
         rPrep     = new FixedRouting(xRayCenter);
-        rXRay     = new XRayRouting(traceCenter, recCenter);
-        rTrace    = new TraceRouting(recCenter);
+        rXRay     = new XRayRouting(traceCenter, recCenter, STREAM_S4_ROUTING);
+        rTrace    = new TraceRouting(recCenter, STREAM_S5_ROUTING);
         rRecupero = new FixedRouting(null);
     }
 
@@ -102,7 +102,7 @@ public final class SimulationModel {
                 new TruncatedNormalGenerator(MEAN_S2, STD_S2, LB2, UB2),
                 rngs, STREAM_S2_SERVICE
         );
-        FlowAssignmentPolicy sqfPolicy = new SqfPolicy(rngs, STREAM_S2_ROUTING);
+        FlowAssignmentPolicy sqfPolicy = new SqfPolicy(rngs, STREAM_S2_FLOWPOL);
         varchiCenter = new MultiServerMultiQueue(
                 ID_VARCHI_ELETTRONICI, "Varchi", sp2, rVarchi, statCollector, M2, sqfPolicy
         );
