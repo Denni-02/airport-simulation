@@ -1,4 +1,4 @@
-package mbpmcsn.stats;
+package mbpmcsn.stats.sampling;
 
 /*
  *  a single statistic shot

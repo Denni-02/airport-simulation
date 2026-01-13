@@ -1,4 +1,4 @@
-package mbpmcsn.stats;
+package mbpmcsn.stats.sampling;
 
 import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;

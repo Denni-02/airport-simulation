@@ -11,8 +11,8 @@ import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
 import mbpmcsn.routing.NetworkRoutingPoint;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.SampleCollector;
 
 /**
  * m parallel servers and a single FIFO queue
@@ -128,6 +128,8 @@ public class MultiServerSingleQueue extends Center {
 		metrics.put(sampleTsKey, getResponseTimeMeanSoFar());
 		metrics.put(sampleTqKey, getQueueTimeMeanSoFar());
 		metrics.put(sampleSKey, getServiceTimeMeanSoFar());
+
+		metrics.put(statSysTsKey, getSystemResponseTimeSuccessMeanSoFar());
 
 		return metrics;
 	}

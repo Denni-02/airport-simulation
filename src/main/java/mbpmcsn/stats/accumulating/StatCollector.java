@@ -1,4 +1,4 @@
-package mbpmcsn.stats;
+package mbpmcsn.stats.accumulating;
 
 import java.util.HashMap;
 import java.util.Map;

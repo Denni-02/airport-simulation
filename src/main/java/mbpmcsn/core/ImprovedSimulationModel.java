@@ -5,8 +5,8 @@ import java.util.List;
 import mbpmcsn.center.Center;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.event.EventQueue;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.SampleCollector;
 
 public final class ImprovedSimulationModel extends SimulationModel {
 	public ImprovedSimulationModel(

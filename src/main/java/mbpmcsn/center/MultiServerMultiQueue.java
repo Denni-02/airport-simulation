@@ -13,8 +13,8 @@ import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
 import mbpmcsn.flowpolicy.FlowAssignmentPolicy;
 import mbpmcsn.routing.NetworkRoutingPoint;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.SampleCollector;
 
 /**
  * m server, where each server has its own dedicated queue
@@ -163,6 +163,8 @@ public class MultiServerMultiQueue extends Center {
 		metrics.put(sampleTsKey, getResponseTimeMeanSoFar());
 		metrics.put(sampleTqKey, getQueueTimeMeanSoFar());
 		metrics.put(sampleSKey, getServiceTimeMeanSoFar());
+
+		metrics.put(statSysTsKey, getSystemResponseTimeSuccessMeanSoFar());
 
 		return metrics;
 	}

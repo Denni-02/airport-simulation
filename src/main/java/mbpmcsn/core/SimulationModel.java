@@ -6,8 +6,8 @@ import mbpmcsn.entity.Job;
 import mbpmcsn.center.Center;
 import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.SampleCollector;
 import mbpmcsn.desbook.Rngs;
 
 public abstract class SimulationModel {

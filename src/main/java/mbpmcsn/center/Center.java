@@ -5,8 +5,8 @@ import mbpmcsn.desbook.Rngs;
 import mbpmcsn.event.Event;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.routing.NetworkRoutingPoint;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.SampleCollector;
 import mbpmcsn.entity.Job;
 
 /*

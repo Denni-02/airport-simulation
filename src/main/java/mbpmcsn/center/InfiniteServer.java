@@ -6,8 +6,8 @@ import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.entity.Job;
 import mbpmcsn.routing.NetworkRoutingPoint;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.SampleCollector;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -92,8 +92,6 @@ public class InfiniteServer extends Center {
 		metrics.put(sampleTqKey, getQueueTimeMeanSoFar());
 		metrics.put(sampleSKey, getServiceTimeMeanSoFar());
 
-		//this can be done by one center only, or get multiple repeated entries
-		//for same time from multiple centers
 		metrics.put(statSysTsKey, getSystemResponseTimeSuccessMeanSoFar());
 
 		return metrics;

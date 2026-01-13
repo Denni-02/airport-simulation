@@ -14,8 +14,8 @@ import mbpmcsn.routing.*;
 import mbpmcsn.flowpolicy.*;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.event.EventQueue;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.SampleCollector;
 import java.util.ArrayList;
 import java.util.List;
 

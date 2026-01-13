@@ -7,12 +7,12 @@ import mbpmcsn.core.SimulationModel;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.event.Event;
-import mbpmcsn.stats.StatCollector;
-import mbpmcsn.stats.Sample;
-import mbpmcsn.stats.SampleCollector;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.sampling.Sample;
+import mbpmcsn.stats.sampling.SampleCollector;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.runners.smbuilders.SimulationModelBuilder;
-import mbpmcsn.stats.StatLogger;
+import mbpmcsn.stats.accumulating.StatLogger;
 
 import static mbpmcsn.core.Constants.SEED;
 
