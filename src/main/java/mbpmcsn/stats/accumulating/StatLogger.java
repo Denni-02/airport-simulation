@@ -16,9 +16,11 @@ public final class StatLogger {
     // PER ORA GESTIAMO COSI' SOLO PER DEBUGGARE
     public static void printReport(StatCollector sc) {
 
+        /*
         System.out.println("\n==========================================================================================================");
         System.out.println("                REPORT FINALE SIMULAZIONE AEROPORTO                ");
         System.out.println("==========================================================================================================");
+        */
 
         // 1. STATISTICHE GLOBALI DI SISTEMA
         System.out.println("\n--- Statistiche Globali ----------------------------------------------------");
@@ -92,7 +94,7 @@ public final class StatLogger {
                     note);
         }
         System.out.println("------------------------------------------------------------------------------------------------------");
-        System.out.println("=========================================================================================================\n");
+        //System.out.println("=========================================================================================================\n");
     }
 
     private static String[] decodeKey(String key) {
