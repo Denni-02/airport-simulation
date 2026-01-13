@@ -1,25 +1,21 @@
 package mbpmcsn.runners;
 
-import java.util.List;
-
 import mbpmcsn.center.Center;
 import mbpmcsn.core.SimulationModel;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.event.Event;
 import mbpmcsn.stats.accumulating.StatCollector;
-import mbpmcsn.stats.sampling.Sample;
 import mbpmcsn.stats.sampling.SampleCollector;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.runners.smbuilders.SimulationModelBuilder;
-import mbpmcsn.stats.accumulating.StatLogger;
 
 /**
  * Executes a SINGLE simulation run (Replication) from time 0 to simulationTime.
  * Does NOT plant seeds. Uses the provided Rngs state.
  */
 
-public final class SingleReplication implements Runner {
+public final class SingleReplication {
     private final SimulationModel simulationModel;
     private final EventQueue eventQueue;
     private final StatCollector statCollector;
@@ -46,8 +42,7 @@ public final class SingleReplication implements Runner {
                 sampleCollector, approxServicesAsExp);
     }
 
-    @Override
-    public void runIt() {
+    public void runReplication() {
         statCollector.clear();
         eventQueue.clear();
 
@@ -58,20 +53,21 @@ public final class SingleReplication implements Runner {
             initSamplingEvents();
         }
 
-        // Next-Event loop
-        while (eventQueue.getCurrentClock() < simulationTime) {
-            if (eventQueue.isEmpty()) {
-                break;
-            }
+        while (!eventQueue.isEmpty()) {
+        	boolean simulationMustContinue = 
+        		eventQueue.getCurrentClock() < simulationTime;
 
             // extract the upcoming event and process
             Event e = eventQueue.pop();
 
-            // new arrival
-            if (e.getType() == EventType.ARRIVAL) {
-                if (e.getTime() == e.getJob().getArrivalTime()) {
-                    simulationModel.planNextArrival();
-                }
+            // new arrival, if simulation shall 
+            // terminate, await for queue to drain
+            if (
+            		simulationMustContinue && 
+            		e.getType() == EventType.ARRIVAL && 
+            		e.getTime() == e.getJob().getArrivalTime()) {
+
+            	simulationModel.planNextArrival();
             }
 
             simulationModel.processEvent(e);
@@ -100,6 +96,4 @@ public final class SingleReplication implements Runner {
             }
         }
     }
-
-
 }

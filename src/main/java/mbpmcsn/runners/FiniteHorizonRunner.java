@@ -1,17 +1,14 @@
 package mbpmcsn.runners;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.TreeMap;
 
-import mbpmcsn.center.Center;
-import mbpmcsn.core.Constants;
-import mbpmcsn.core.SimulationModel;
-import mbpmcsn.event.EventQueue;
-import mbpmcsn.event.EventType;
-import mbpmcsn.event.Event;
 import mbpmcsn.stats.accumulating.StatCollector;
 import mbpmcsn.stats.ie.IntervalEstimation;
 import mbpmcsn.stats.sampling.Sample;
-import mbpmcsn.stats.sampling.SampleCollector;
 import mbpmcsn.desbook.Rngs;
 import mbpmcsn.runners.smbuilders.SimulationModelBuilder;
 import mbpmcsn.stats.accumulating.StatLogger;
@@ -43,7 +40,7 @@ public final class FiniteHorizonRunner implements Runner {
 		this.approxServicesAsExp = approxServicesAsExp;
 		this.samplingInterval = samplingInterval;
 		this.rngs = new Rngs();
-		this.rngs.plantSeeds(Constants.SEED);
+		this.rngs.plantSeeds(SEED);
 	}
 
 	@Override 
@@ -67,15 +64,16 @@ public final class FiniteHorizonRunner implements Runner {
 					builder, rngs, simulationTime, approxServicesAsExp, currentSampling
 			);
 
-			run.runIt();
+			run.runReplication();
 			StatCollector stats = run.getStatCollector();
 
 			// ACCUMULO DATI SU TUTTE LE RUN
-			for (String key : stats.getPopulationStats().keySet()) {
+			for (final String key : stats.getPopulationStats().keySet()) {
 				populationData.putIfAbsent(key, new ArrayList<>());
 				populationData.get(key).add(stats.getPopulationMean(key));
 			}
-			for (String key : stats.getTimeStats().keySet()) {
+
+			for (final String key : stats.getTimeStats().keySet()) {
 				timeData.putIfAbsent(key, new ArrayList<>());
 				timeData.get(key).add(stats.getTimeWeightedMean(key));
 			}
@@ -85,12 +83,10 @@ public final class FiniteHorizonRunner implements Runner {
 				printPilotRunDiagnostic(stats, run.getSampleCollector().getSamples());
 				System.out.println("\n... Esecuzione delle restanti " + (NUM_REPLICATIONS - 1) + " replicazioni in background ...");
 			}
-
 		}
 
 		// REPORT MEDIA SU TUTTE LE RUN
 		printFinalScientificResults(populationData, timeData);
-
 	}
 
 	private void printExperimentHeader() {
@@ -167,6 +163,4 @@ public final class FiniteHorizonRunner implements Runner {
 			System.out.printf("%-30s |   DATI INSUFFICIENTI PER STIMA   |\n", metric);
 		}
 	}
-
-
 }
