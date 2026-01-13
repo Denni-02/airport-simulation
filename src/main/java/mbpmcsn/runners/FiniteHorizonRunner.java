@@ -1,13 +1,15 @@
 package mbpmcsn.runners;
 
-import java.util.List;
+import java.util.*;
 
 import mbpmcsn.center.Center;
+import mbpmcsn.core.Constants;
 import mbpmcsn.core.SimulationModel;
 import mbpmcsn.event.EventQueue;
 import mbpmcsn.event.EventType;
 import mbpmcsn.event.Event;
 import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.ie.IntervalEstimation;
 import mbpmcsn.stats.sampling.Sample;
 import mbpmcsn.stats.sampling.SampleCollector;
 import mbpmcsn.desbook.Rngs;
@@ -21,13 +23,14 @@ import static mbpmcsn.core.Constants.SEED;
  */
 
 public final class FiniteHorizonRunner implements Runner {
-	private final SimulationModel simulationModel;
-	private final EventQueue eventQueue;
-	private final StatCollector statCollector;
-	private final SampleCollector sampleCollector;
-	private final Rngs rngs;
+
+	private static final int NUM_REPLICATIONS = 64;
+
+	private final SimulationModelBuilder builder;
 	private final double simulationTime;
+	private final boolean approxServicesAsExp;
 	private final double samplingInterval;
+	private final Rngs rngs;
 
 	public FiniteHorizonRunner(
 			SimulationModelBuilder smBuilder,
@@ -35,86 +38,135 @@ public final class FiniteHorizonRunner implements Runner {
 			boolean approxServicesAsExp,
 			double samplingInterval) {
 
-		rngs = new Rngs();
-		rngs.plantSeeds(SEED);
-		eventQueue = new EventQueue();
-		statCollector = new StatCollector();
-		sampleCollector = new SampleCollector();
+		this.builder = smBuilder;
 		this.simulationTime = simulationTime;
+		this.approxServicesAsExp = approxServicesAsExp;
 		this.samplingInterval = samplingInterval;
-		simulationModel = smBuilder.build(
-				rngs, eventQueue, statCollector, 
-				sampleCollector, approxServicesAsExp);
+		this.rngs = new Rngs();
+		this.rngs.plantSeeds(Constants.SEED);
 	}
 
 	@Override 
 	public void runIt() {
-		statCollector.clear();
-		eventQueue.clear();
-		
-		// first arrival
-		simulationModel.planNextArrival();
 
-		// pre-schedulung of sampling
-		initSamplingEvents();
+		// STAMPA HEADER
+		printExperimentHeader();
 
-		// Next-Event loop
-		while (eventQueue.getCurrentClock() < simulationTime) {
-			if (eventQueue.isEmpty()) {
-				break;
+		// MAPPE  PER RACCOGLIERE I DATI DI TUTTE LE REPLICAZIONI
+		Map<String, List<Double>> populationData = new HashMap<>();
+		Map<String, List<Double>> timeData = new HashMap<>();
+
+		// LOOP DELLE REPLICAZIONI
+		for (int i = 0; i < NUM_REPLICATIONS; i++) {
+
+			// CAMPIONAMENTO DELLA PRIMA RUN
+			double currentSampling = (i == 0) ? samplingInterval : 0;
+
+			// ESECUZIONE DELLA SINGOLA REPLICA
+			SingleReplication run = new SingleReplication(
+					builder, rngs, simulationTime, approxServicesAsExp, currentSampling
+			);
+
+			run.runIt();
+			StatCollector stats = run.getStatCollector();
+
+			// ACCUMULO DATI SU TUTTE LE RUN
+			for (String key : stats.getPopulationStats().keySet()) {
+				populationData.putIfAbsent(key, new ArrayList<>());
+				populationData.get(key).add(stats.getPopulationMean(key));
+			}
+			for (String key : stats.getTimeStats().keySet()) {
+				timeData.putIfAbsent(key, new ArrayList<>());
+				timeData.get(key).add(stats.getTimeWeightedMean(key));
 			}
 
-			// extract the upcoming event and process
-			Event e = eventQueue.pop();
-
-			// new arrival
-			if (e.getType() == EventType.ARRIVAL) {
-				if (e.getTime() == e.getJob().getArrivalTime()) {
-					simulationModel.planNextArrival();
-				}
+			// GESTIONE OUTPUT DETTAGLIATO (SOLO RUN 1)
+			if (i == 0) {
+				printPilotRunDiagnostic(stats, run.getSampleCollector().getSamples());
+				System.out.println("\n... Esecuzione delle restanti " + (NUM_REPLICATIONS - 1) + " replicazioni in background ...");
 			}
 
-			simulationModel.processEvent(e);
 		}
 
-		printSimThings();
+		// REPORT MEDIA SU TUTTE LE RUN
+		printFinalScientificResults(populationData, timeData);
+
 	}
 
-	private void printSimThings() {
-		// PER ORA GESTIAMO COSI' SOLO PER DEBUGGARE
-		System.out.println("\n--- Simulazione Terminata ---");
-
-		StatLogger.printReport(statCollector);
-
-		List<Sample> samples = sampleCollector.getSamples();
-
-		// Feedback visivo sui sample raccolti
-		System.out.println("[INFO] Campioni raccolti per analisi temporale: " + samples.size());
-
-		// --- DEBUG: STAMPIAMO I CAMPIONI PER VEDERE SE ESISTONO ---
-		System.out.println("\n--- ANTEPRIMA DATI CAMPIONATI (SampleCollector) ---");
-		System.out.println("Time; Center; Metric; Value");
-
-		// Stampiamo solo i primi 40 per non intasare tutto
-		for(int i = 0; i < samples.size(); i++) {
-			System.out.println(samples.get(i));
-		}
-
-		System.out.println("... (altri " + (samples.size() - 40) + " campioni nascosti) ...");
+	private void printExperimentHeader() {
+		System.out.println("\n");
+		System.out.println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("||   AVVIO ESPERIMENTO DI SIMULAZIONE A ORIZZONTE FINITO          ||");
+		System.out.printf( "||   Replicazioni: %-3d                                            ||\n", NUM_REPLICATIONS);
+		System.out.printf( "||   Durata singola run: %-10.0f secondi                       ||\n", simulationTime);
+		System.out.println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n");
 	}
 
-	private void initSamplingEvents() {
-		if (samplingInterval <= 0) {
-			return;
-		}
+	// Per la prima replica stampiamo sia statistiche time e jov avg sia il sampling
+	private void printPilotRunDiagnostic(StatCollector stats, List<Sample> samples) {
+		System.out.println("\n");
+		System.out.println("####################################################################");
+		System.out.println("#  SEZIONE 1: DIAGNOSTICA REPLICAZIONE PILOTA (RUN #1 di 64)       #");
+		System.out.println("####################################################################");
 
-		// starts from interval (es. 300s), continues until < simulationTime, increment interval
-		for (double t = samplingInterval; t < simulationTime; t += samplingInterval) {
-			// schedule SAMPLING events for every Center
-			for (final Center c : simulationModel.getCenters()) {
-				Event sampleEvent = new Event(t, EventType.SAMPLING, c, null, null);
-				eventQueue.add(sampleEvent);
+		System.out.println("\nA. Medie della Singola Replica ");
+		StatLogger.printReport(stats);
+
+		System.out.println("\nB. Campionamento Temporale ");
+		System.out.println("");
+		int totalSamples = samples.size();
+		System.out.printf("Campioni raccolti: %d (Intervallo: %.2f s)\n", totalSamples, samplingInterval);
+
+		if (totalSamples > 0) {
+			System.out.println("\nTime       | Center               | Metric                    | Value");
+			System.out.println("-----------+----------------------+---------------------------+----------");
+			for (Sample s : samples) {
+				System.out.printf("%-10.2f | %-20s | %-25s | %.4f\n",
+						s.getTimestamp(), s.getCenterName(), s.getMetric(), s.getValue());
 			}
+			System.out.println("-----------+----------------------+---------------------------+----------");
+		} else {
+			System.out.println("(Nessun campione raccolto)");
+		}
+		System.out.println("####################################################################");
+	}
+
+	// Stampa il report scientifico finale (Intervalli di confidenza)
+	private void printFinalScientificResults(Map<String, List<Double>> popData, Map<String, List<Double>> timeData) {
+		System.out.println("\n\n");
+		System.out.println("####################################################################");
+		System.out.println("#  SEZIONE 2: RISULTATI SCIENTIFICI FINALI (SU 64 REPLICAZIONI)    #");
+		System.out.println("####################################################################");
+
+		System.out.println("\n>>> Statistiche Job Based <<<\n");
+		System.out.println("Metrica                        | Media Stimata | Intervallo (95%) | Range Confidenza [Min ... Max]");
+		System.out.println("-------------------------------+---------------+------------------+---------------------------------");
+		for (String key : new TreeMap<>(popData).keySet()) {
+			printIntervalRow(key, popData.get(key));
+		}
+
+		System.out.println("\n\n>>> Statistiche Time Based <<<\n");
+		System.out.println("Metrica                        | Media Stimata | Intervallo (95%) | Range Confidenza [Min ... Max]");
+		System.out.println("-------------------------------+---------------+------------------+---------------------------------");
+		for (String key : new TreeMap<>(timeData).keySet()) {
+			printIntervalRow(key, timeData.get(key));
+		}
+		System.out.println("\n");
+	}
+
+	private void printIntervalRow(String metric, List<Double> values) {
+		try {
+			double width = IntervalEstimation.width(values);
+			double mean = values.stream().mapToDouble(v -> v).average().orElse(0.0);
+			double min = mean - width;
+			double max = mean + width;
+
+			System.out.printf("%-30s | %13.4f | +/- %12.4f | [%10.4f ... %10.4f]\n",
+					metric, mean, width, min, max);
+		} catch (Exception e) {
+			System.out.printf("%-30s |   DATI INSUFFICIENTI PER STIMA   |\n", metric);
 		}
 	}
+
+
 }
