@@ -53,6 +53,7 @@ public class VerificationRunner implements Runner {
 		// --- VERIFICA CENTRO 2: Varchi (M/M/k) ---
 		// Tutti i passeggeri (sia diretti che da check-in) arrivano qui
 		// Lambda_Varchi = Lambda_Tot
+		// Approssimazione: SQF permette di considerarlo come M/M/k
 		verifyMMkNode("Varchi", stats, lambdaTot, Constants.M2, Constants.MEAN_S2);
 
 		// --- VERIFICA CENTRO 3: Preparazione (M/M/inf) ---
@@ -61,15 +62,16 @@ public class VerificationRunner implements Runner {
 		verifyInfiniteServer("Preparazione", stats, Constants.MEAN_S3);
 
 		// --- VERIFICA CENTRO 4: XRay (M/M/k) ---
-		// Anche qui arriva tutto il flusso
-		verifyMMkNode("XRay", stats, lambdaTot, Constants.M4, Constants.MEAN_S4);
+		// Qui il Round Robin spezza il flusso in k flussi indipendenti
+		// NON usiamo Erlang-C, ma la formula M/M/1 sul singolo server
+		// La media globale accumulata dal simulatore deve coincidere con la media del singolo M/M/1
+		verifyIndependentMM1("XRay", stats, lambdaTot, Constants.M4, Constants.MEAN_S4);
 
 		// --- VERIFICA CENTRO 5: Trace Detection (M/M/k) ---
 		double lambdaTrace = lambdaTot * Constants.P_CHECK;
 		verifyMMkNode("TraceDetection", stats, lambdaTrace, Constants.M5, Constants.MEAN_S5);
 
 		// --- VERIFICA CENTRO 6: Recupero (M/M/inf) ---
-		// Infinite Server
 		verifyInfiniteServer("Recupero", stats, Constants.MEAN_S6);
 	}
 
@@ -77,49 +79,53 @@ public class VerificationRunner implements Runner {
 	 * Verifica per nodi M/M/k (Single Queue o Multi Queue approssimata)
 	 */
 	private void verifyMMkNode(String name, StatCollector stats, double lambda, int k, double meanService) {
-		double mu = 1.0 / meanService;  // Tasso di servizio (pax/sec)
-		double rho = lambda / (k * mu); // Utilizzazione
+		double mu = 1.0 / meanService;
+		double rho = lambda / (k * mu);
 
-		System.out.printf("\n>>> Centro: %-15s [M/M/%d] (Lambda=%.4f)\n", name, k, lambda);
+		System.out.printf("\n>>> Centro: %-15s [M/M/%d] (Erlang-C)\n", name, k);
 
-		// Controllo Stabilità
-		if (rho >= 1.0) {
-			System.out.printf("    [ERRORE] Sistema instabile (Rho = %.4f >= 1).\n", rho);
-			return;
-		}
+		if (checkInstability(rho)) return;
 
-		// --- CALCOLO TEORICO ---
-
-		// 1. Calcolo P0 (Probabilità sistema vuoto)
-		double sumP0 = 0.0;
+		// Calcolo P0
+		double sum = 0.0;
 		double a = lambda / mu;
-
 		for (int n = 0; n < k; n++) {
-			sumP0 += Math.pow(a, n) / factorial(n);
+			sum += Math.pow(a, n) / factorial(n);
 		}
 		double termK = (Math.pow(a, k) / factorial(k)) * (1.0 / (1.0 - rho));
-		double p0 = 1.0 / (sumP0 + termK);
+		double p0 = 1.0 / (sum + termK);
 
-		// 2. Formula di Erlang-C: PQ = Probabilità di trovare tutti i server occupati
-		double probabilityWait = (Math.pow(a, k) * p0) / (factorial(k) * (1.0 - rho));
+		// Erlang-C: Probabilità di attesa in coda
+		double pq = (Math.pow(a, k) * p0) / (factorial(k) * (1.0 - rho));
 
-		// 3. Tempi Medi Attesi
-		double E_Tq_Theor = probabilityWait * (1.0 / (k * mu - lambda)); // Tempo medio in Coda (Wait)
-		double E_Ts_Theor = E_Tq_Theor + meanService;                    // Tempo medio nel Sistema (Response)
+		// Tempi medi
+		double E_Tq = pq / (k * mu - lambda);
+		double E_Ts_Theor = E_Tq + meanService;
 
-		// --- DATO SIMULATO ---
+		compareAndPrint(name, stats, rho, E_Ts_Theor);
+	}
 
-		// Recuperiamo "Ts_NomeCentro" (Tempo di Risposta Medio Population-Based)
-		double E_Ts_Sim = stats.getPopulationMean("Ts_" + name);
+	/**
+	 * Caso: k * M/M/1 (Multi-Coda con Round Robin)
+	 * Formula: M/M/1 su flusso diviso
+	 */
+	private void verifyIndependentMM1(String name, StatCollector stats, double lambdaTot, int k, double meanService) {
+		System.out.printf("\n>>> Centro: %-15s [k * M/M/1] (Round Robin)\n", name);
 
-		// --- CALCOLO ERRORE RELATIVO ---
-		double errorPerc = Math.abs(E_Ts_Sim - E_Ts_Theor) / E_Ts_Theor * 100.0;
+		// Dividiamo il flusso, ogni server riceve lambda/k
+		double lambdaSingle = lambdaTot / k;
+		double mu = 1.0 / meanService;
 
-		System.out.printf("    Utilizzo (Rho)   : %.4f\n", rho);
-		System.out.printf("    E[Ts] Teorico    : %.4f s  (Tq=%.2f + S=%.2f)\n", E_Ts_Theor, E_Tq_Theor, meanService);
-		System.out.printf("    E[Ts] Simulato   : %.4f s\n", E_Ts_Sim);
+		// Utilizzo del singolo server (uguale all'utilizzo globale)
+		double rho = lambdaSingle / mu;
 
-		checkError(errorPerc);
+		if (checkInstability(rho)) return;
+
+		// Formula esatta M/M/1 per il Tempo di Risposta (Wait + Service)
+		// E[Ts] = 1 / (mu - lambda)
+		double E_Ts_Theor = 1.0 / (mu - lambdaSingle);
+
+		compareAndPrint(name, stats, rho, E_Ts_Theor);
 	}
 
 	/**
@@ -127,24 +133,36 @@ public class VerificationRunner implements Runner {
 	 * In questi nodi non esiste coda (Tq = 0), quindi Ts = S
 	 */
 	private void verifyInfiniteServer(String name, StatCollector stats, double meanService) {
-		System.out.printf("\n>>> Centro: %-15s [M/M/inf] (Delay Center)\n", name);
+		System.out.printf("\n>>> Centro: %-15s [M/M/inf] (Delay)\n", name);
 
-		double E_Ts_Theor = meanService;
-		double E_Ts_Sim = stats.getPopulationMean("Ts_" + name);
-
-		double errorPerc = Math.abs(E_Ts_Sim - E_Ts_Theor) / E_Ts_Theor * 100.0;
-
-		System.out.printf("    E[Ts] Teorico    : %.4f s (Solo servizio)\n", E_Ts_Theor);
-		System.out.printf("    E[Ts] Simulato   : %.4f s\n", E_Ts_Sim);
-
-		checkError(errorPerc);
+		// Non c'è stabilità da controllare (rho è sempre 0 per definizione)
+		// Il tempo di risposta è puramente il tempo di servizio
+		compareAndPrint(name, stats, 0.0, meanService);
 	}
 
-	private void checkError(double errorPerc) {
-		if (errorPerc < 5.0) {
-			System.out.printf("    [OK] VALIDAZIONE SUPERATA (Errore: %.2f%%)\n", errorPerc);
+	private boolean checkInstability(double rho) {
+		if (rho >= 1.0) {
+			System.out.printf("    [ERRORE CRITICO] Sistema Instabile (Rho = %.4f >= 1.0).\n", rho);
+			System.out.println("    La teoria prevede code infinite. Impossibile verificare.");
+			return true;
+		}
+		return false;
+	}
+
+	private void compareAndPrint(String name, StatCollector stats, double rho, double expectedVal) {
+		// Recupero il valore simulato (Media Globale accumulata)
+		double simulatedVal = stats.getPopulationMean("Ts_" + name);
+
+		double error = Math.abs(simulatedVal - expectedVal) / expectedVal * 100.0;
+
+		System.out.printf("    Utilizzo (Rho)   : %.4f\n", rho);
+		System.out.printf("    E[Ts] Teorico    : %.4f s\n", expectedVal);
+		System.out.printf("    E[Ts] Simulato   : %.4f s\n", simulatedVal);
+
+		if (error < 5.0) {
+			System.out.printf("    [OK] Verifica Superata (Errore: %.2f%%)\n", error);
 		} else {
-			System.out.printf("    [FAIL] ERRORE ECCESSIVO (Errore: %.2f%%). Aumentare durata simulazione?\n", errorPerc);
+			System.out.printf("    [WARNING] Errore alto (%.2f%%). Aumentare durata?\n", error);
 		}
 	}
 
