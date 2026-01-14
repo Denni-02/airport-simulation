@@ -1,6 +1,6 @@
 package mbpmcsn;
 
-import mbpmcsn.runners.FiniteHorizonRunner;
+import mbpmcsn.runners.finitehorizon.FiniteHorizonRunner;
 import mbpmcsn.runners.Runner;
 import mbpmcsn.runners.smbuilders.BaseSimulationModelBuilder;
 
@@ -47,7 +47,6 @@ public class App {
 					case 1:
 						System.out.println("\n[INFO] Avvio Finite Horizon Experiment...");
 						runner = new FiniteHorizonRunner(new BaseSimulationModelBuilder(), 10000, false, 100.00);
-						runner.runIt();
 						break;
 
 					case 2:

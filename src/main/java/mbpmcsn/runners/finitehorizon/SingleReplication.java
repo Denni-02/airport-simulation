@@ -1,4 +1,4 @@
-package mbpmcsn.runners;
+package mbpmcsn.runners.finitehorizon;
 
 import mbpmcsn.center.Center;
 import mbpmcsn.core.SimulationModel;
