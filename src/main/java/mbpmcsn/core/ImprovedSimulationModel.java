@@ -14,14 +14,16 @@ public final class ImprovedSimulationModel extends SimulationModel {
     		EventQueue eventQueue, 
     		StatCollector statCollector,
     		SampleCollector sampleCollector,
-    		boolean approxServicesAsExp) {
+    		boolean approxServicesAsExp,
+    		double arrivalsMeanTime) {
 
     	super(
     			rngs,
     			eventQueue,
     			statCollector,
     			sampleCollector,
-    			approxServicesAsExp
+    			approxServicesAsExp,
+    			arrivalsMeanTime
     	);
     }
 

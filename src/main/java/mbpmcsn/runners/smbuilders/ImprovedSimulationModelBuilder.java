@@ -14,14 +14,16 @@ public final class ImprovedSimulationModelBuilder implements SimulationModelBuil
 			EventQueue eventQueue, 
 			StatCollector statCollector, 
 			SampleCollector sampleCollector, 
-			boolean approxServicesAsExp) {
+			boolean approxServicesAsExp,
+			double arrivalsMeanTime) {
 
 		return new ImprovedSimulationModel(
 				rngs, 
 				eventQueue, 
 				statCollector, 
 				sampleCollector, 
-				approxServicesAsExp);
+				approxServicesAsExp,
+				arrivalsMeanTime);
 	}
 }
 

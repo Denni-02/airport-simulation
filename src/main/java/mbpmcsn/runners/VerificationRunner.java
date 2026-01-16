@@ -11,9 +11,15 @@ public class VerificationRunner implements Runner {
 	private final SimulationModelBuilder builder;
 	private final double simulationTime;
 	private final Rngs rngs;
+	private final double arrivalsMeanTime;
 
-	public VerificationRunner(SimulationModelBuilder builder, double simulationTime) {
+	public VerificationRunner(
+			SimulationModelBuilder builder, 
+			double arrivalsMeanTime,
+			double simulationTime) {
+
 		this.builder = builder;
+		this.arrivalsMeanTime = arrivalsMeanTime;
 		this.simulationTime = simulationTime;
 		this.rngs = new Rngs();
 		this.rngs.plantSeeds(Constants.SEED);
@@ -32,6 +38,7 @@ public class VerificationRunner implements Runner {
 				rngs,
 				simulationTime,
 				true,  // Attiva M/M/k
+				arrivalsMeanTime,
 				0.0    // Sampling disabilitato
 		);
 
@@ -41,7 +48,7 @@ public class VerificationRunner implements Runner {
 		StatCollector stats = run.getStatCollector();
 
 		// 2. CONFRONTO ANALITICO
-		double lambdaTot = Constants.ARRIVAL_MED_RATE;
+		double lambdaTot = 1 / arrivalsMeanTime;
 
 		System.out.println("\n--- RISULTATI VERIFICA ---");
 		System.out.printf("Lambda Totale (Input): %.4f pax/sec\n", lambdaTot);
@@ -54,7 +61,7 @@ public class VerificationRunner implements Runner {
 		// Tutti i passeggeri (sia diretti che da check-in) arrivano qui
 		// Lambda_Varchi = Lambda_Tot
 		// Approssimazione: SQF permette di considerarlo come M/M/k
-		verifyMMkNode("Varchi", stats, lambdaTot, Constants.M2, Constants.MEAN_S2);
+		verifyIndependentMM1("Varchi", stats, lambdaTot, Constants.M2, Constants.MEAN_S2);
 
 		// --- VERIFICA CENTRO 3: Preparazione (M/M/inf) ---
 		// Infinite Server, non c'è coda
@@ -84,14 +91,18 @@ public class VerificationRunner implements Runner {
 
 		System.out.printf("\n>>> Centro: %-15s [M/M/%d] (Erlang-C)\n", name, k);
 
-		if (checkInstability(rho)) return;
+		if (checkInstability(rho)) {
+			return;
+		}
 
 		// Calcolo P0
 		double sum = 0.0;
 		double a = lambda / mu;
+
 		for (int n = 0; n < k; n++) {
 			sum += Math.pow(a, n) / factorial(n);
 		}
+
 		double termK = (Math.pow(a, k) / factorial(k)) * (1.0 / (1.0 - rho));
 		double p0 = 1.0 / (sum + termK);
 
@@ -119,7 +130,9 @@ public class VerificationRunner implements Runner {
 		// Utilizzo del singolo server (uguale all'utilizzo globale)
 		double rho = lambdaSingle / mu;
 
-		if (checkInstability(rho)) return;
+		if (checkInstability(rho)) {
+			return;
+		}
 
 		// Formula esatta M/M/1 per il Tempo di Risposta (Wait + Service)
 		// E[Ts] = 1 / (mu - lambda)
@@ -146,6 +159,7 @@ public class VerificationRunner implements Runner {
 			System.out.println("    La teoria prevede code infinite. Impossibile verificare.");
 			return true;
 		}
+
 		return false;
 	}
 
@@ -168,9 +182,15 @@ public class VerificationRunner implements Runner {
 
 	// Helper matematico per Erlang-C
 	private double factorial(int n) {
-		if (n == 0) return 1.0;
+		if (n == 0) {
+			return 1.0;
+		}
+
 		double fact = 1.0;
-		for (int i = 1; i <= n; i++) fact *= i;
+		for (int i = 1; i <= n; i++) {
+			fact *= i;
+		}
+
 		return fact;
 	}
 }

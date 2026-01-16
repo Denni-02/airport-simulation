@@ -58,14 +58,16 @@ public final class BaseSimulationModel extends SimulationModel {
     		EventQueue eventQueue, 
     		StatCollector statCollector,
     		SampleCollector sampleCollector,
-    		boolean approxServicesAsExp) {
+    		boolean approxServicesAsExp,
+    		double arrivalsMeanTime) {
 
     	super(
     			rngs,
     			eventQueue,
     			statCollector,
     			sampleCollector,
-    			approxServicesAsExp);
+    			approxServicesAsExp,
+    			arrivalsMeanTime);
     }
 
     @Override
@@ -89,7 +91,7 @@ public final class BaseSimulationModel extends SimulationModel {
 
     @Override
     protected final void createArrivalProcess() {
-    	RandomVariateGenerator rvgArrival = new ExponentialGenerator(ARRIVAL_MED_MEAN_TIME);
+    	RandomVariateGenerator rvgArrival = new ExponentialGenerator(arrivalsMeanTime);
         arrivalProcess = new ArrivalProcess(rvgArrival, rngs, STREAM_ARRIVALS);
     }
 

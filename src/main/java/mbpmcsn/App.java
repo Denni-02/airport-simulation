@@ -49,7 +49,12 @@ public class App {
 					case 1:
 						final double samplingInterval = 100.00; //seconds
 						System.out.println("\n[INFO] Avvio Finite Horizon Experiment...");
-						runner = new FiniteHorizonRunner(new BaseSimulationModelBuilder(), Constants.WORK_DAY, false, samplingInterval);
+						runner = new FiniteHorizonRunner(
+								new BaseSimulationModelBuilder(), 
+								Constants.WORK_DAY, 
+								false, 
+								Constants.ARRIVAL_MED_MEAN_TIME,
+								samplingInterval);
 						break;
 
 					case 2:
@@ -57,16 +62,13 @@ public class App {
 						break;
 
 					case 3:
-
-						final double longRunTime = 100000000.0;
-
+						final double longRunTime = 10000000.0;
 						System.out.println("\n[INFO] Avvio Verification (M/M/k vs Simulation)...");
 						System.out.println("[INFO] Durata simulazione forzata a: " + longRunTime);
-
 						runner = new VerificationRunner(
 								new BaseSimulationModelBuilder(),
-								longRunTime
-						);
+								Constants.ARRIVAL_LOW_MEAN_TIME,
+								longRunTime);
 						break;
 
 					/*case 4: do we really need this?

@@ -30,6 +30,7 @@ public final class SingleReplication {
             Rngs rngs,
             double simulationTime,
             boolean approxServicesAsExp,
+            double arrivalsMeanTime,
             double samplingInterval) {
 
         eventQueue = new EventQueue();
@@ -39,7 +40,8 @@ public final class SingleReplication {
         this.samplingInterval = samplingInterval;
         simulationModel = smBuilder.build(
                 rngs, eventQueue, statCollector,
-                sampleCollector, approxServicesAsExp);
+                sampleCollector, approxServicesAsExp, 
+                arrivalsMeanTime);
     }
 
     public void runReplication() {

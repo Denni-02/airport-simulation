@@ -18,17 +18,21 @@ public abstract class SimulationModel {
     protected final SampleCollector sampleCollector;
     protected final Rngs rngs;
 
+    protected final double arrivalsMeanTime;
+
     protected SimulationModel(
     		Rngs rngs, 
     		EventQueue eventQueue, 
     		StatCollector statCollector,
     		SampleCollector sampleCollector,
-    		boolean approxServicesAsExp) {
+    		boolean approxServicesAsExp,
+    		double arrivalsMeanTime) {
 
         this.rngs = rngs;
         this.eventQueue = eventQueue;
         this.statCollector = statCollector;
         this.sampleCollector = sampleCollector;
+        this.arrivalsMeanTime = arrivalsMeanTime;
 
         createServiceGenerators(approxServicesAsExp);
         createArrivalProcess();
@@ -85,5 +89,9 @@ public abstract class SimulationModel {
         } else {
             statCollector.addSample("SystemResponseTime_Success", responseTime);
         }
+    }
+
+    public double getArrivalsMeanTime() {
+    	return arrivalsMeanTime;
     }
 }

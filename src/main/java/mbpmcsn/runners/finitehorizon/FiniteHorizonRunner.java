@@ -30,6 +30,7 @@ public final class FiniteHorizonRunner implements Runner {
 	private final SimulationModelBuilder builder;
 	private final double simulationTime;
 	private final boolean approxServicesAsExp;
+	private final double arrivalsMeanTime;
 	private final double samplingInterval;
 	private final Rngs rngs;
 
@@ -37,12 +38,14 @@ public final class FiniteHorizonRunner implements Runner {
 			SimulationModelBuilder smBuilder,
 			double simulationTime,
 			boolean approxServicesAsExp,
+			double arrivalsMeanTime,
 			double samplingInterval) {
 
 		this.builder = smBuilder;
 		this.simulationTime = simulationTime;
 		this.approxServicesAsExp = approxServicesAsExp;
 		this.samplingInterval = samplingInterval;
+		this.arrivalsMeanTime = arrivalsMeanTime;
 		this.rngs = new Rngs();
 		this.rngs.plantSeeds(SEED);
 	}
@@ -63,7 +66,9 @@ public final class FiniteHorizonRunner implements Runner {
 
 			// ESECUZIONE DELLA SINGOLA REPLICA
 			SingleReplication run = new SingleReplication(
-					builder, rngs, simulationTime, approxServicesAsExp, samplingInterval
+					builder, rngs, simulationTime, 
+					approxServicesAsExp, arrivalsMeanTime, 
+					samplingInterval
 			);
 
 			run.runReplication();

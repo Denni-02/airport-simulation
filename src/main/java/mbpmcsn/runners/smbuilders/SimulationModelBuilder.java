@@ -12,5 +12,6 @@ public interface SimulationModelBuilder {
 			EventQueue eventQueue, 
 			StatCollector statCollector, 
 			SampleCollector sampleCollector, 
-			boolean approxServicesAsExp);
+			boolean approxServicesAsExp,
+			double arrivalsMeanTime);
 }

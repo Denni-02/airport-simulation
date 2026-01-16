@@ -14,14 +14,16 @@ public final class BaseSimulationModelBuilder implements SimulationModelBuilder 
 			EventQueue eventQueue, 
 			StatCollector statCollector, 
 			SampleCollector sampleCollector, 
-			boolean approxServicesAsExp) {
+			boolean approxServicesAsExp,
+			double arrivalsMeanTime) {
 
 		return new BaseSimulationModel(
 				rngs, 
 				eventQueue, 
 				statCollector, 
 				sampleCollector, 
-				approxServicesAsExp);
+				approxServicesAsExp,
+				arrivalsMeanTime);
 	}
 }
 
