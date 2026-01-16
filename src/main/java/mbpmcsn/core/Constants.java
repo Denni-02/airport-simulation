@@ -72,7 +72,7 @@ public final class Constants {
     public static final double UB2 = 25;
     // --- Center 3: Controlli a Raggi X (MSMQ), Erlang-k (k=3)
     public static final int M3 = 6; // numero server centro 4
-    public static final double MEAN_S3 = 45;
+    public static final double MEAN_S3 = 44;
     public static final double STD_S3 = 20.0;
     public static final double LB3 = 20.0;
     public static final double UB3 = 90;

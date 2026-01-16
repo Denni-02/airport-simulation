@@ -67,7 +67,7 @@ public class App {
 						System.out.println("[INFO] Durata simulazione forzata a: " + longRunTime);
 						runner = new VerificationRunner(
 								new BaseSimulationModelBuilder(),
-								Constants.ARRIVAL_MED_MEAN_TIME * 5,
+								Constants.ARRIVAL_MED_MEAN_TIME,
 								longRunTime);
 						break;
 
