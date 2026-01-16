@@ -35,7 +35,6 @@ public final class BaseSimulationModel extends SimulationModel {
     /* centers */
     private Center centerCheckIn; // ID 1
     private Center centerVarchi; // ID 2
-    private Center centerPrep; // ID 3
     private Center centerXRay; // ID 4
     private Center centerTrace; // ID 5
     private Center centerRecupero; // ID 6
@@ -48,7 +47,6 @@ public final class BaseSimulationModel extends SimulationModel {
     /* service generators */
     private RandomVariateGenerator rvgCheckIn;
     private RandomVariateGenerator rvgVarchi;
-    private RandomVariateGenerator rvgPrep;
     private RandomVariateGenerator rvgXRay;
     private RandomVariateGenerator rvgTrace;
     private RandomVariateGenerator rvgRecupero;
@@ -75,17 +73,15 @@ public final class BaseSimulationModel extends SimulationModel {
     	if(hasToApproxToExpSvc) {
     		rvgCheckIn = new ExponentialGenerator(MEAN_S1);
     		rvgVarchi = new ExponentialGenerator(MEAN_S2);
-    		rvgPrep =  new ExponentialGenerator(MEAN_S3);
-    		rvgXRay = new ExponentialGenerator(MEAN_S4);
-    		rvgTrace = new ExponentialGenerator(MEAN_S5);
-    		rvgRecupero = new ExponentialGenerator(MEAN_S6);
+    		rvgXRay = new ExponentialGenerator(MEAN_S3);
+    		rvgTrace = new ExponentialGenerator(MEAN_S4);
+    		rvgRecupero = new ExponentialGenerator(MEAN_S5);
     	} else {
     		rvgCheckIn = new TruncatedNormalGenerator(MEAN_S1, STD_S1, LB1, UB1);
     		rvgVarchi = new TruncatedNormalGenerator(MEAN_S2, STD_S2, LB2, UB2);
-    		rvgPrep =  new TruncatedNormalGenerator(MEAN_S3, STD_S3, LB3, UB3);
-    		rvgXRay = new ErlangGenerator(K4, MEAN_S4_k);
-    		rvgTrace = new TruncatedNormalGenerator(MEAN_S5, STD_S5, LB5, UB5);
-    		rvgRecupero = new TruncatedNormalGenerator(MEAN_S6, STD_S6, LB6, UB6);
+    		rvgXRay = new TruncatedNormalGenerator(MEAN_S3, STD_S3, LB3, UB3);
+    		rvgTrace = new TruncatedNormalGenerator(MEAN_S4, STD_S4, LB4, UB4);
+    		rvgRecupero = new TruncatedNormalGenerator(MEAN_S5, STD_S5, LB5, UB5);
     	}
     }
 
@@ -97,60 +93,48 @@ public final class BaseSimulationModel extends SimulationModel {
 
     @Override
     protected final void createCenters() {
-        // 6. Recupero Oggetti
-        ServiceProcess sp6 = new ServiceProcess(rvgRecupero, rngs, STREAM_S6_SERVICE);
+        // 5. Recupero Oggetti
+        ServiceProcess sp5 = new ServiceProcess(rvgRecupero, rngs, STREAM_S5_SERVICE);
         NetworkRoutingPoint routingRecupero = new FixedRouting(null);
         centerRecupero = new InfiniteServer(
                 ID_RECUPERO_OGGETTI,
                 "Recupero",
-                sp6,
+                sp5,
                 routingRecupero,
                 statCollector,
                 this.sampleCollector
         );
 
-        // 5. Trace Detection
-        ServiceProcess sp5 = new ServiceProcess(rvgTrace, rngs, STREAM_S5_SERVICE);
-        NetworkRoutingPoint routingTrace = new TraceRouting(centerRecupero, STREAM_S5_ROUTING);
+        // 4. Trace Detection
+        ServiceProcess sp4 = new ServiceProcess(rvgTrace, rngs, STREAM_S4_SERVICE);
+        NetworkRoutingPoint routingTrace = new TraceRouting(centerRecupero, STREAM_S4_ROUTING);
         centerTrace = new SingleServerSingleQueue(
                 ID_TRACE_DETECTION ,
                 "TraceDetection",
-                sp5,
+                sp4,
                 routingTrace,
                 statCollector,
                 this.sampleCollector
         );
 
-        // 4. X-Ray (MSMQ) - Nota: Erlang
-        ServiceProcess sp4 = new ServiceProcess(rvgXRay, rngs, STREAM_S4_SERVICE);
-        NetworkRoutingPoint routingXRay = new XRayRouting(centerTrace, centerRecupero, STREAM_S4_ROUTING);
+        // 3. X-Ray (MSMQ) - Nota: Erlang
+        ServiceProcess sp3 = new ServiceProcess(rvgXRay, rngs, STREAM_S3_SERVICE);
+        NetworkRoutingPoint routingXRay = new XRayRouting(centerTrace, centerRecupero, STREAM_S3_ROUTING);
         FlowAssignmentPolicy rrPolicy = new RoundRobinPolicy();
         centerXRay = new MultiServerMultiQueue(
                 ID_XRAY,
                 "XRay",
-                sp4,
+                sp3,
                 routingXRay,
                 statCollector,
                 this.sampleCollector,
-                M4,
+                M3,
                 rrPolicy
-        );
-
-        // 3. Preparazione
-        ServiceProcess sp3 = new ServiceProcess(rvgPrep, rngs, STREAM_S3_SERVICE);
-        NetworkRoutingPoint routingPrep = new FixedRouting(centerXRay);
-        centerPrep = new InfiniteServer(
-                ID_PREPARAZIONE_OGGETTI,
-                "Preparazione",
-                sp3,
-                routingPrep,
-                statCollector,
-                this.sampleCollector
         );
 
         // 2. Varchi (MSMQ)
         ServiceProcess sp2 = new ServiceProcess(rvgVarchi, rngs, STREAM_S2_SERVICE);
-        NetworkRoutingPoint routingVarchi = new FixedRouting(centerPrep);
+        NetworkRoutingPoint routingVarchi = new FixedRouting(centerXRay);
         FlowAssignmentPolicy sqfPolicy = new SqfPolicy(rngs, STREAM_S2_FLOWPOL);
         centerVarchi = new MultiServerMultiQueue(
                 ID_VARCHI_ELETTRONICI,
@@ -186,7 +170,6 @@ public final class BaseSimulationModel extends SimulationModel {
 
         centers.add(centerCheckIn);
         centers.add(centerVarchi);
-        centers.add(centerPrep);
         centers.add(centerXRay);
         centers.add(centerTrace);
         centers.add(centerRecupero);

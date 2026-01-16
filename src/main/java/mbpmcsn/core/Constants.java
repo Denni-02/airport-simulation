@@ -18,24 +18,21 @@ public final class Constants {
     public static final int STREAM_S2_SERVICE    = 20;
     public static final int STREAM_S2_FLOWPOL    = 21; // SQF
 
-    public static final int STREAM_S3_SERVICE    = 30;
+    public static final int STREAM_S3_SERVICE    = 40;
+    public static final int STREAM_S3_ROUTING    = 41; // trace/recupero
 
-    public static final int STREAM_S4_SERVICE    = 40;
-    public static final int STREAM_S4_ROUTING    = 41; // trace/recupero
+    public static final int STREAM_S4_SERVICE    = 50;
+    public static final int STREAM_S4_ROUTING    = 51; // espulsione/recupero
 
-    public static final int STREAM_S5_SERVICE    = 50;
-    public static final int STREAM_S5_ROUTING    = 51; // espulsione/recupero
-
-    public static final int STREAM_S6_SERVICE    = 60;
+    public static final int STREAM_S5_SERVICE    = 60;
 
     // --- Topology Node IDs ---
     public static final int ID_INGRESSO = 0;       // Source
     public static final int ID_BANCHI_CHECKIN = 1;        // MSSQ
     public static final int ID_VARCHI_ELETTRONICI = 2;         // MSMQ
-    public static final int ID_PREPARAZIONE_OGGETTI = 3;   // IS (Infinite Server)
-    public static final int ID_XRAY = 4;           // MSMQ
-    public static final int ID_TRACE_DETECTION = 5;          // SSQ
-    public static final int ID_RECUPERO_OGGETTI = 6;       // IS (Infinite Server)
+    public static final int ID_XRAY = 3;           // MSMQ
+    public static final int ID_TRACE_DETECTION = 4;          // SSQ
+    public static final int ID_RECUPERO_OGGETTI = 5;       // IS (Infinite Server)
 
     // --- Arrival Process ---
 
@@ -73,26 +70,22 @@ public final class Constants {
     public static final double STD_S2 = 4;
     public static final double LB2 = 12.0;
     public static final double UB2 = 25;
-    // --- Center 3: Preparazione Oggetti Utente (IS), Truncated Normal
-    public static final double MEAN_S3 = 90.0;
-    public static final double STD_S3 = 30.0;
-    public static final double LB3 = 45.0;
-    public static final double UB3 = 130.0;
-    // --- Center 4: Controlli a Raggi X (MSMQ), Erlang-k (k=3)
-    public static final int M4 = 6; // numero server centro 4
-    public static final int K4 = 3;
-    public static final double MEAN_S4 = 48;
-    public static final double MEAN_S4_k = 16; // (MEAN_S4 / K4)
-    // --- Center 5: Trace Detection (SSQ), Truncated Normal ---
-    public static final int M5 = 1; // numero server centro 5
-    public static final double MEAN_S5 = 60.0;
-    public static final double STD_S5 = 20.0;
-    public static final double LB5 = 30.0;
-    public static final double UB5 = 100;
-    // --- Center 6: Recupero Oggetti Utente (IS), Truncated Normal ---
-    public static final double MEAN_S6 = 120.0;
-    public static final double STD_S6 = 40.0;
-    public static final double LB6 = 60.0;
-    public static final double UB6 = 340.0;
+    // --- Center 3: Controlli a Raggi X (MSMQ), Erlang-k (k=3)
+    public static final int M3 = 6; // numero server centro 4
+    public static final double MEAN_S3 = 45;
+    public static final double STD_S3 = 20.0;
+    public static final double LB3 = 20.0;
+    public static final double UB3 = 90;
+    // --- Center 4: Trace Detection (SSQ), Truncated Normal ---
+	public static final int M4 = 1;
+    public static final double MEAN_S4 = 60.0;
+    public static final double STD_S4 = 20.0;
+    public static final double LB4 = 30.0;
+    public static final double UB4 = 100;
+    // --- Center 5: Recupero Oggetti Utente (IS), Truncated Normal ---
+    public static final double MEAN_S5 = 120.0;
+    public static final double STD_S5 = 40.0;
+    public static final double LB5 = 60.0;
+    public static final double UB5 = 340.0;
 
 }

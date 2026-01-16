@@ -61,25 +61,20 @@ public class VerificationRunner implements Runner {
 		// Tutti i passeggeri (sia diretti che da check-in) arrivano qui
 		// Lambda_Varchi = Lambda_Tot
 		// Approssimazione: SQF permette di considerarlo come M/M/k
-		verifyIndependentMM1("Varchi", stats, lambdaTot, Constants.M2, Constants.MEAN_S2);
+		verifyMMkNode("Varchi", stats, lambdaTot, Constants.M2, Constants.MEAN_S2);
 
-		// --- VERIFICA CENTRO 3: Preparazione (M/M/inf) ---
-		// Infinite Server, non c'è coda
-		// Il tempo di risposta deve coincidere col tempo di servizio
-		verifyInfiniteServer("Preparazione", stats, Constants.MEAN_S3);
-
-		// --- VERIFICA CENTRO 4: XRay (M/M/k) ---
+		// --- VERIFICA CENTRO 3: XRay (M/M/k) ---
 		// Qui il Round Robin spezza il flusso in k flussi indipendenti
 		// NON usiamo Erlang-C, ma la formula M/M/1 sul singolo server
 		// La media globale accumulata dal simulatore deve coincidere con la media del singolo M/M/1
-		verifyIndependentMM1("XRay", stats, lambdaTot, Constants.M4, Constants.MEAN_S4);
+		verifyIndependentMM1("XRay", stats, lambdaTot, Constants.M3, Constants.MEAN_S3);
 
-		// --- VERIFICA CENTRO 5: Trace Detection (M/M/k) ---
+		// --- VERIFICA CENTRO 4: Trace Detection (M/M/k) ---
 		double lambdaTrace = lambdaTot * Constants.P_CHECK;
-		verifyMMkNode("TraceDetection", stats, lambdaTrace, Constants.M5, Constants.MEAN_S5);
+		verifyMMkNode("TraceDetection", stats, lambdaTrace, Constants.M4, Constants.MEAN_S4);
 
-		// --- VERIFICA CENTRO 6: Recupero (M/M/inf) ---
-		verifyInfiniteServer("Recupero", stats, Constants.MEAN_S6);
+		// --- VERIFICA CENTRO 5: Recupero (M/M/inf) ---
+		verifyInfiniteServer("Recupero", stats, Constants.MEAN_S5);
 	}
 
 	/*
