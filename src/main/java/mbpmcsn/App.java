@@ -73,14 +73,13 @@ public class App {
 
 					case 4:
 						System.out.println("\n[INFO] Avvio Analisi del Transitorio...");
-						final double transientSampling = 400.0;
 
 						runner = new FiniteHorizonRunner(
 								"transient-analysis",
 								new BaseSimulationModelBuilder(),
-								Constants.TRANSIENT_SAMPLING_INTERVAL,
+								Constants.TRANSIENT_DURATION,
 								false,
-								Constants.ARRIVAL_MED_MEAN_TIME,
+								Constants.ARRIVAL_MED_MEAN_TIME * 2,
 								Constants.TRANSIENT_SAMPLING_INTERVAL);
 						break;
 

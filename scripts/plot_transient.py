@@ -3,19 +3,21 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-# Lancia py scripts/plot_transient.py output/transient-analysis
+# Lancia py scripts/plot_transient.py output/transient-analysis ReducedLambda
+# Oppure py scripts/plot_transient.py output/transient-analysis MedLambda
 
 # CONFIGURAZIONE
 NUM_REPLICATIONS_TO_PLOT = 7
 
-def generate_transient_plots(experiment_path):
+# Aggiunto parametro opzionale 'filename_suffix'
+def generate_transient_plots(experiment_path, filename_suffix=""):
     runs_dir = os.path.join(experiment_path, "runs-samples")
 
     if not os.path.exists(runs_dir):
         print(f"ERRORE: Cartella runs-samples non trovata in: {experiment_path}")
         return
 
-    print(f"--- Generazione Plot per: {experiment_path} ---")
+    print(f"--- Generazione Plot per: {experiment_path} (Suffisso: '{filename_suffix}') ---")
 
     # Definiamo dove salvare i grafici
     output_dir = os.path.join(experiment_path, "plot")
@@ -62,7 +64,7 @@ def generate_transient_plots(experiment_path):
         except Exception as e:
             print(f"ERRORE leggendo Run {i}: {e}")
 
-    # 2. FUNZIONE PLOTTING CON LEGENDA MIGLIORATA
+    # 2. FUNZIONE PLOTTING
     def plot_spaghetti(data_list, title, filename, y_label):
         if not data_list:
             print(f"[SKIP] Nessun dato per {title}")
@@ -76,52 +78,59 @@ def generate_transient_plots(experiment_path):
         for idx, df_run in enumerate(data_list):
             run_id = df_run['RunID'].iloc[0]
 
-            # --- MODIFICA LEGENDA QUI ---
-            # Rendiamo esplicito che Run ID corrisponde allo Stream RNGS
+            # Legenda: Run ID = Stream RNGS
             label_text = f"Run {run_id} (Stream #{run_id})"
 
             plt.plot(df_run['Time'], df_run['Value'],
                      label=label_text,
                      color=colors[idx],
                      linewidth=1.5,
-                     alpha=0.75) # alpha < 1 aiuta a vedere le sovrapposizioni
+                     alpha=0.75)
 
         plt.title(f"Transient Analysis: {title}", fontsize=15, fontweight='bold')
         plt.xlabel("Tempo di Simulazione (s)", fontsize=12)
         plt.ylabel(y_label, fontsize=12)
 
-        # Posizione e stile legenda
-        plt.legend(loc='upper right', title="Configurazione Seed", frameon=True, shadow=True)
+        # Legenda in alto a sinistra
+        plt.legend(loc='upper left', title="Configurazione Seed", frameon=True, shadow=True)
 
         plt.grid(True, linestyle='--', alpha=0.4)
 
         out_path = os.path.join(output_dir, filename)
-        plt.savefig(out_path, dpi=200, bbox_inches='tight') # DPI alto per la tesi
+        plt.savefig(out_path, dpi=200, bbox_inches='tight')
         plt.close()
         print(f" -> Generato Grafico: {filename}")
 
     # 3. GENERAZIONE
     print("\nGenerazione Grafici...")
 
+    # Qui aggiungiamo il suffisso al nome del file
     plot_spaghetti(collected_data['System_Ts'],
                    "System Response Time E[Ts]",
-                   "Transient_System_Ts.png",
+                   f"Transient_System_Ts{filename_suffix}.png",
                    "Tempo Risposta (s)")
 
     plot_spaghetti(collected_data['XRay_Ts'],
                    "XRay Response Time E[Ts]",
-                   "Transient_XRay_Ts.png",
+                   f"Transient_XRay_Ts{filename_suffix}.png",
                    "Tempo Risposta XRay (s)")
 
     plot_spaghetti(collected_data['XRay_Nq'],
                    "XRay Queue Length E[Nq]",
-                   "Transient_XRay_Nq.png",
+                   f"Transient_XRay_Nq{filename_suffix}.png",
                    "Utenti in Coda XRay")
 
     print(f"\n--- Finito. Grafici salvati in: {output_dir} ---")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python scripts/plot_transient.py <cartella_esperimento>")
+        print("Uso: python scripts/plot_transient.py <cartella_esperimento> [suffisso_opzionale]")
+        print("Esempio: python scripts/plot_transient.py output/transient-analysis ReducedLambda")
     else:
-        generate_transient_plots(sys.argv[1])
+        path = sys.argv[1]
+        suffix = ""
+        # Se c'è un terzo argomento, usalo come suffisso (aggiungendo l'underscore automaticamente)
+        if len(sys.argv) > 2:
+            suffix = "_" + sys.argv[2] # Es. diventa "_ReducedLambda"
+
+        generate_transient_plots(path, suffix)
