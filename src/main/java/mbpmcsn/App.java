@@ -33,7 +33,7 @@ public class App {
 
 			System.out.println("3. VERIFICATION");
 
-			//System.out.println("4. TRANSIENT ANALYSIS"); do we really need this?
+			System.out.println("4. TRANSIENT ANALYSIS");
 
 			System.out.println("5. Esci");
 			System.out.println("----------------------------------------------");
@@ -50,9 +50,10 @@ public class App {
 						final double samplingInterval = 100.00; //seconds
 						System.out.println("\n[INFO] Avvio Finite Horizon Experiment...");
 						runner = new FiniteHorizonRunner(
-								new BaseSimulationModelBuilder(), 
-								Constants.WORK_DAY, 
-								false, 
+								"finite-horizon-workday",
+								new BaseSimulationModelBuilder(),
+								Constants.WORK_DAY,
+								false,
 								Constants.ARRIVAL_MED_MEAN_TIME,
 								samplingInterval);
 						break;
@@ -71,9 +72,9 @@ public class App {
 								longRunTime);
 						break;
 
-					/*case 4: do we really need this?
+					case 4:
 						System.out.println("\n[INFO] Avvio Analisi del Transitorio...");
-						break;*/
+						break;
 
 					case 5:
 						System.out.println("Uscita.");
