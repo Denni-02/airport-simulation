@@ -224,3 +224,6 @@ output/*
 output/finite-horizon-workday/*
 !output/finite-horizon-workday/plot/
 !output/finite-horizon-workday/tables/
+!output/transient-analysis/
+output/transient-analysis/*
+!output/transient-analysis/plot/
