@@ -50,7 +50,7 @@ public class App {
 					case 1:
 						System.out.println("\n[INFO] Avvio Finite Horizon Experiment...");
 						runner = new FiniteHorizonRunner(
-								"finite-horizon-workday",
+								"finite-horizon-workday-base",
 								new BaseSimulationModelBuilder(),
 								Constants.WORK_DAY,
 								false,
@@ -61,10 +61,10 @@ public class App {
 					case 2:
 						System.out.println("\n[INFO] Avvio Infinite Horizon Experiment (Batch Means)...");
 						runner = new SteadyStateRunner(
-								"steady-state",
+								"steady-state-base-halflambda",
 								new BaseSimulationModelBuilder(),
-								false,
-								Constants.ARRIVAL_MED_MEAN_TIME * 2,
+								true,
+								Constants.ARRIVAL_LOW_MEAN_TIME,
 								60000);
 						break;
 
@@ -74,15 +74,14 @@ public class App {
 						System.out.println("[INFO] Durata simulazione forzata a: " + longRunTime);
 						runner = new VerificationRunner(
 								new BaseSimulationModelBuilder(),
-								Constants.ARRIVAL_MED_MEAN_TIME,
+								Constants.ARRIVAL_LOW_MEAN_TIME,
 								longRunTime);
 						break;
 
 					case 4:
 						System.out.println("\n[INFO] Avvio Analisi del Transitorio...");
-
 						runner = new FiniteHorizonRunner(
-								"transient-analysis",
+								"transient-analysis-base",
 								new BaseSimulationModelBuilder(),
 								Constants.TRANSIENT_DURATION,
 								false,

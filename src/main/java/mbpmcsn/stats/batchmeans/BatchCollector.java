@@ -1,6 +1,7 @@
 package mbpmcsn.stats.batchmeans;
 
 import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.center.Center;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -8,6 +9,15 @@ import java.util.Map;
 import java.util.HashMap;
 
 public final class BatchCollector {
+	
+	private static final class PerCenterBatchInfo {
+		
+		/* how many jobs for this center so far */
+		private int jobCount;
+
+		/* how many batches we collected so far */
+		private int batchesCount;
+	}
 
 	/* batch size */
 	private final int b;
@@ -18,12 +28,6 @@ public final class BatchCollector {
 	/* batch being set when # of jobCount reaches b */
 	private final Map<String, Double> currentBatch;
 
-	/* collect batch stats each # of jobs */
-	private final int jobInterval;
-
-	/* enable job-based warmup condition check */
-	private final int jobWarmup;
-
 	/* enable time-based warmup condition check */
 	private final double timeWarmup;
 
@@ -33,73 +37,15 @@ public final class BatchCollector {
 	/* when all of k batches are collected... do whatever you want */
 	private final OnAllKBatchesDoneCallback onAllKBatchesDoneCallback;
 
-	/* incremented whenever collectBatchStats 
-	 * gets called by the center */
-	private int jobCount;
+	/* batch collection infos for each center */
+	private final Map<String, PerCenterBatchInfo> perCenterBatchInfo;
 
-	/* incremented as batches are collected */
-	private int batchesCount;
-
-	public BatchCollector(
-			int b, 
-			int k,
-			int jobInterval,
-			OnAllKBatchesDoneCallback onAllKBatchesDoneCallback) {
-
-		this(
-				b,
-				k,
-				jobInterval, 
-				0, 
-				0,
-				onAllKBatchesDoneCallback);
-	}
+	/* centers participating */
+	private List<Center> centers;
 
 	public BatchCollector(
 			int b, 
 			int k,
-			int jobInterval, 
-			int jobWarmup,
-			OnAllKBatchesDoneCallback onAllKBatchesDoneCallback) {
-
-		this(
-				b,
-				k,
-				jobInterval, 
-				jobWarmup, 
-				0,
-				onAllKBatchesDoneCallback);
-
-		if(jobWarmup == 0) {
-			throw new IllegalArgumentException("ctor with jobWarmup set to 0");
-		}
-	}
-
-	public BatchCollector(
-			int b, 
-			int k,
-			int jobInterval, 
-			double timeWarmup,
-			OnAllKBatchesDoneCallback onAllKBatchesDoneCallback) {
-
-		this(
-				b,
-				k,
-				jobInterval, 
-				0, 
-				timeWarmup,
-				onAllKBatchesDoneCallback);
-
-		if(timeWarmup == 0) {
-			throw new IllegalArgumentException("ctor with timeWarmup set to 0");
-		}
-	}
-
-	private BatchCollector(
-			int b, 
-			int k,
-			int jobInterval, 
-			int jobWarmup,
 			double timeWarmup,
 			OnAllKBatchesDoneCallback onAllKBatchesDoneCallback) {
 
@@ -107,51 +53,64 @@ public final class BatchCollector {
 		this.k = k;
 		this.currentBatch = new HashMap<>();
 		this.batchMeans = new HashMap<>();
-		this.jobInterval = jobInterval;
-		this.jobWarmup = jobWarmup;
 		this.timeWarmup = timeWarmup;
 		this.onAllKBatchesDoneCallback = onAllKBatchesDoneCallback;
+		this.perCenterBatchInfo = new HashMap<>();
+	}
+
+	public void setCenters(List<Center> centers) {
+		this.centers = centers;
+	}
+
+	public void initZeroPerCenterBatchInfo() {
+		for(final Center center : centers) {
+			perCenterBatchInfo.put(center.getName(), new PerCenterBatchInfo());
+		}
 	}
 
 	/* called by the center anyway, method impl 
 	 * will take care of determining whether
 	 * to collect or not, based on passed params */
-	public void collectBatchStats(double nowtime, StatCollector stats) {
+	public void collectBatchStats(String centerName, double nowtime, StatCollector stats) {
 		if(isWarmingUp(nowtime)) {
 			/* don't collect transitory data */
 			stats.clear();
 			return;
 		}
 
-		if(jobInterval == 0 || jobCount % jobInterval == 0) {
-			addBatchStats(stats);
-		}
+		PerCenterBatchInfo batchInfo = perCenterBatchInfo.get(centerName);
 
-		jobCount++;
+		addBatchStats(centerName, batchInfo, stats);
 	}
 
-    private void addBatchStats(StatCollector stats) {
-    	if(jobCount < b) {
+    private void addBatchStats(String centerName, PerCenterBatchInfo batchInfo, StatCollector stats) {
+    	if(batchInfo.jobCount >= b) {
     		return;
     	}
 
         // save Population-Based metrics
         // stats.getPopulationStats() return Map<String, PopulationStat>
         stats.getPopulationStats().forEach((key, popStat) -> {
-            currentBatch.put(key, Double.valueOf(popStat.calculateMean()));
+        	if(key.contains(centerName)) {
+        		currentBatch.put(key, Double.valueOf(popStat.calculateMean()));
+        	}
         });
 
         // save Time-Based metrics
         // stats.getTimeStats() return Map<String, TimeStat>
         stats.getTimeStats().forEach((key, timeStat) -> {
-            currentBatch.put(key, Double.valueOf(timeStat.calculateMean()));
+        	if(key.contains(centerName)) {
+        		currentBatch.put(key, Double.valueOf(timeStat.calculateMean()));
+        	}
         });
 
+        batchInfo.jobCount++;
+
     	//did we collect all k batches?
-    	boolean allKBatchesDone = addFullBatch(currentBatch);
+    	boolean allKBatchesDone = !addFullBatch(batchInfo);
 
     	currentBatch.clear();
-    	jobCount = 0;
+    	batchInfo.jobCount = 0;
 
     	if(allKBatchesDone) {
     		onAllKBatchesDoneCallback.onDone(this);
@@ -159,28 +118,33 @@ public final class BatchCollector {
     }
 
     private boolean isWarmingUp(double nowtime) {
-    	if(jobWarmup == 0 && timeWarmup == 0) {
-    		return false;
-    	}
-
-    	if(jobWarmup != 0) {
-    		return jobCount < jobWarmup;
-    	}
-
-    	return nowtime < timeWarmup;
+    	return timeWarmup != 0 && nowtime < timeWarmup;
     }
 
-    private boolean addFullBatch(Map<String, Double> batch) {
-    	if(batchesCount == k) {
+    private boolean addFullBatch(PerCenterBatchInfo batchInfo) {
+    	boolean needsToContinue = false;
+
+    	for(final String centerNameKey : perCenterBatchInfo.keySet()) {
+    		if(perCenterBatchInfo.get(centerNameKey).batchesCount < k) {
+    			needsToContinue = true;
+    			break;
+    		}
+    	}
+
+    	if(!needsToContinue) {
     		return false;
     	}
 
-    	batch.forEach((batchKey, batchValue) -> {
+    	if(batchInfo.batchesCount == k) {
+    		return true;
+    	}
+
+    	currentBatch.forEach((batchKey, batchValue) -> {
     		batchMeans.putIfAbsent(batchKey, new ArrayList<>());
     		batchMeans.get(batchKey).add(batchValue);
     	});
 
-    	batchesCount++;
+    	batchInfo.batchesCount++;
 
     	return true;
     }
@@ -200,8 +164,7 @@ public final class BatchCollector {
     public void clear() {
     	currentBatch.clear();
     	batchMeans.clear();
-    	jobCount = 0;
-    	batchesCount = 0;
+    	initZeroPerCenterBatchInfo();
     }
 }
 

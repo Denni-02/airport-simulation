@@ -1,10 +1,15 @@
 package mbpmcsn.runners.steadystate;
 
+import java.util.List;
+import java.util.Map;
+
 import mbpmcsn.runners.Runner;
 import mbpmcsn.runners.smbuilders.SimulationModelBuilder;
 import mbpmcsn.desbook.Rngs;
-
 import mbpmcsn.core.Constants;
+import mbpmcsn.stats.batchmeans.BatchMathUtils;
+import mbpmcsn.stats.batchmeans.BatchRow;
+import mbpmcsn.stats.ie.IntervalEstimationRow;
 
 
 /**
@@ -15,8 +20,6 @@ import mbpmcsn.core.Constants;
 
 public final class SteadyStateRunner implements Runner {
 	private final String experimentName;
-	private final boolean approxServicesAsExp;
-	private final double arrivalsMeanTime;
 
 	private final VeryLongRun veryLongRun;
 
@@ -28,14 +31,13 @@ public final class SteadyStateRunner implements Runner {
 			double timeWarmup) {
 
 		this.experimentName = experimentName;
-		this.approxServicesAsExp = approxServicesAsExp;
-		this.arrivalsMeanTime = arrivalsMeanTime;
 
 		Rngs rngs = new Rngs();
 		rngs.plantSeeds(Constants.SEED);
 
 		veryLongRun = new VeryLongRun(
-				builder, rngs, 
+				builder, 
+				rngs, 
 				approxServicesAsExp, 
 				arrivalsMeanTime,
 				timeWarmup);
@@ -45,6 +47,25 @@ public final class SteadyStateRunner implements Runner {
 	public void runIt() {
 		printExperimentHeader();
 		veryLongRun.run();
+
+		Map<String, List<Double>> batchMeans = veryLongRun.getBatchCollector().getBatchMeans();
+
+		for(final String sKey : batchMeans.keySet()) {
+			System.out.println(sKey+ " - num batches: " + batchMeans.get(sKey).size());
+			System.out.println("ac: " + BatchMathUtils.computeAutocorrelation(batchMeans.get(sKey)));
+			/*for(final Double val : batchMeans.get(sKey)) {
+				System.out.println(sKey + ": " + val);
+			}*/
+		}
+
+		BatchRow.fromMapOfData(batchMeans); // use this to get csvs to write...
+
+		List<IntervalEstimationRow> ierows = 
+			IntervalEstimationRow.fromMapOfData(veryLongRun.getBatchCollector().getBatchMeans());
+
+		for(final IntervalEstimationRow ierow : ierows) {
+			System.out.println(ierow);
+		}
 
 	}
 

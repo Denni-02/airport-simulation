@@ -187,7 +187,7 @@ public abstract class Center {
 			return;
 		}
 
-		batchCollector.collectBatchStats(nowtime, statCollector);
+		batchCollector.collectBatchStats(name, nowtime, statCollector);
 	}
 
 	// ------------------------------------------------------------------------

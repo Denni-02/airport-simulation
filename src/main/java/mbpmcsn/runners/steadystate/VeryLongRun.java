@@ -31,12 +31,15 @@ public final class VeryLongRun {
 		eventQueue = new EventQueue();
 		statCollector = new StatCollector();
 		batchCollector = new BatchCollector(
-				BATCH_SIZE, NUM_BATCHES, 0, timeWarmup,
+				BATCH_SIZE, NUM_BATCHES, timeWarmup,
 				buildBatchesDoneCallback());
 		simulationModel = smBuilder.build(
 				rngs, eventQueue, statCollector, 
 				null, batchCollector, 
 				approxServicesAsExp, arrivalsMeanTime);
+
+		batchCollector.setCenters(simulationModel.getCenters());
+		batchCollector.initZeroPerCenterBatchInfo();
 	}
 
 	private OnAllKBatchesDoneCallback buildBatchesDoneCallback() {
