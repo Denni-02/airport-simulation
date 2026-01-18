@@ -1,0 +1,83 @@
+package mbpmcsn.runners.steadystate;
+
+import mbpmcsn.desbook.Rngs;
+import mbpmcsn.core.SimulationModel;
+import mbpmcsn.event.*;
+import mbpmcsn.stats.accumulating.StatCollector;
+import mbpmcsn.stats.batchmeans.BatchCollector;
+import mbpmcsn.stats.batchmeans.OnAllKBatchesDoneCallback;
+import mbpmcsn.runners.smbuilders.SimulationModelBuilder;
+
+/* we may reuse this for the VerificationRunner */
+
+public final class VeryLongRun {
+	public static final int NUM_BATCHES = 96;
+	public static final int BATCH_SIZE = 1080;
+
+	private final EventQueue eventQueue;
+	private final StatCollector statCollector;
+	private final BatchCollector batchCollector;
+	private final SimulationModel simulationModel;
+
+	private Boolean simulationGoesOn = true;
+
+	public VeryLongRun(
+			SimulationModelBuilder smBuilder,
+			Rngs rngs, 
+			boolean approxServicesAsExp, 
+			double arrivalsMeanTime,
+			double timeWarmup) {
+
+		eventQueue = new EventQueue();
+		statCollector = new StatCollector();
+		batchCollector = new BatchCollector(
+				BATCH_SIZE, NUM_BATCHES, 0, timeWarmup,
+				buildBatchesDoneCallback());
+		simulationModel = smBuilder.build(
+				rngs, eventQueue, statCollector, 
+				null, batchCollector, 
+				approxServicesAsExp, arrivalsMeanTime);
+	}
+
+	private OnAllKBatchesDoneCallback buildBatchesDoneCallback() {
+		return new OnAllKBatchesDoneCallback() {
+			@Override
+			public void onDone(BatchCollector b) {
+				simulationGoesOn = false;
+			}
+		};
+	}
+
+	public void run() {
+		statCollector.clear();
+		batchCollector.clear();
+
+		// first arrival
+        simulationModel.planNextArrival();
+
+        while (simulationGoesOn) {
+            // extract the upcoming event and process
+            Event e = eventQueue.pop();
+
+            // plan next arrival if got into the entire queueing network
+            if (
+            		e.getType() == EventType.ARRIVAL && 
+            		e.getTime() == e.getJob().getArrivalTime()) {
+
+            	simulationModel.planNextArrival();
+            }
+
+            // process popped event
+            simulationModel.processEvent(e);
+        }
+	}
+
+	public StatCollector getStatCollector() {
+		return statCollector;
+	}
+
+	public BatchCollector getBatchCollector() {
+		return batchCollector;
+	}
+}
+

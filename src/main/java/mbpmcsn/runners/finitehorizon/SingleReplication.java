@@ -93,7 +93,13 @@ public final class SingleReplication {
         for (double t = samplingInterval; t < simulationTime; t += samplingInterval) {
             // schedule SAMPLING events for every Center
             for (final Center c : simulationModel.getCenters()) {
-                Event sampleEvent = new Event(t, EventType.SAMPLING, c, null, null);
+                Event sampleEvent = new Event(
+                		t, 
+                		EventType.SAMPLING, 
+                		c, 
+                		null, 
+                		null);
+
                 eventQueue.add(sampleEvent);
             }
         }

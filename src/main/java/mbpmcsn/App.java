@@ -3,6 +3,7 @@ package mbpmcsn;
 import mbpmcsn.core.Constants;
 import mbpmcsn.runners.VerificationRunner;
 import mbpmcsn.runners.finitehorizon.FiniteHorizonRunner;
+import mbpmcsn.runners.steadystate.SteadyStateRunner;
 import mbpmcsn.runners.Runner;
 import mbpmcsn.runners.smbuilders.BaseSimulationModelBuilder;
 
@@ -59,6 +60,12 @@ public class App {
 
 					case 2:
 						System.out.println("\n[INFO] Avvio Infinite Horizon Experiment (Batch Means)...");
+						runner = new SteadyStateRunner(
+								"steady-state",
+								new BaseSimulationModelBuilder(),
+								false,
+								Constants.ARRIVAL_MED_MEAN_TIME * 2,
+								60000);
 						break;
 
 					case 3:

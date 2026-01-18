@@ -196,5 +196,12 @@ public final class BatchCollector {
     public Map<String, List<Double>> getBatchMeans() {
         return batchMeans;
     }
+
+    public void clear() {
+    	currentBatch.clear();
+    	batchMeans.clear();
+    	jobCount = 0;
+    	batchesCount = 0;
+    }
 }
 
