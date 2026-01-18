@@ -61,7 +61,7 @@ public class App {
 					case 2:
 						System.out.println("\n[INFO] Avvio Infinite Horizon Experiment (Batch Means)...");
 						runner = new SteadyStateRunner(
-								"steady-state-base-doublemedmeantime",
+								"steady-state-doublemedmeantime",
 								new BaseSimulationModelBuilder(),
 								true,
 								Constants.ARRIVAL_MED_MEAN_TIME * 2,
