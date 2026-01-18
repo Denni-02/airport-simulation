@@ -50,8 +50,7 @@ public final class Constants {
     public static final double FINITE_HORIZON_SAMPLING_INTERVAL = 100.00;
     public static final double TRANSIENT_DURATION = 100000.0;
     public static final double TRANSIENT_SAMPLING_INTERVAL = 400.0;
-
-    // 0.03706383333
+    public static final double TIME_WARMUP = 60000.0;
 
     // --- Routing Probabilities ---
     public static final double P_DESK = 0.387181; // Vai ai Banchi Accettazione

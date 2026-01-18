@@ -20,7 +20,6 @@ import mbpmcsn.stats.ie.IntervalEstimationRow;
 
 public final class SteadyStateRunner implements Runner {
 	private final String experimentName;
-
 	private final VeryLongRun veryLongRun;
 
 	public SteadyStateRunner(
@@ -57,7 +56,7 @@ public final class SteadyStateRunner implements Runner {
 				System.out.println(sKey + ": " + val);
 			}*/
 		}
-
+		System.out.println("");
 		BatchRow.fromMapOfData(batchMeans); // use this to get csvs to write...
 
 		List<IntervalEstimationRow> ierows = 
