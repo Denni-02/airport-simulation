@@ -69,13 +69,12 @@ public class App {
 						break;
 
 					case 3:
-						final double longRunTime = 100000000.0;
-						System.out.println("\n[INFO] Avvio Verification (M/M/k vs Simulation)...");
-						System.out.println("[INFO] Durata simulazione forzata a: " + longRunTime);
+                        System.out.println("\n[INFO] Avvio Verification (M/M/k vs Simulation)...");
+						System.out.println("[INFO] Nota: La durata è determinata dal raggiungimento dei Batch (k=96).");
 						runner = new VerificationRunner(
 								new BaseSimulationModelBuilder(),
-								Constants.ARRIVAL_MED_MEAN_TIME * 2,
-								longRunTime);
+								Constants.ARRIVAL_MED_MEAN_TIME * 2
+						);
 						break;
 
 					case 4:

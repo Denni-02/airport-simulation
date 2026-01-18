@@ -191,5 +191,20 @@ public final class BatchCollector {
     	batchMeans.clear();
     	initZeroPerCenterBatchInfo();
     }
+
+	// calculate mean of the means of batches
+	public double getBatchGrandMean(String key) {
+		List<Double> values = batchMeans.get(key);
+
+		if (values == null || values.isEmpty()) {
+			return 0.0;
+		}
+
+		double sum = 0.0;
+		for (Double v : values) {
+			sum += v;
+		}
+		return sum / values.size();
+	}
 }
 
