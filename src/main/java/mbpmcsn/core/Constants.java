@@ -35,7 +35,6 @@ public final class Constants {
     public static final int ID_RECUPERO_OGGETTI = 5;       // IS (Infinite Server)
 
     // --- Arrival Process ---
-
     public static final double ARRIVAL_PEAK_RATE = 0.222383; /* pax/sec */
     public static final double ARRIVAL_PEAK_MEAN_TIME = 4.496747; /* (1 / ARRIVAL_PEAK_RATE) sec */
 

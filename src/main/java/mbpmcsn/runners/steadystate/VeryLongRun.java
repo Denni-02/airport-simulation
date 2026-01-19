@@ -56,23 +56,23 @@ public final class VeryLongRun {
 		batchCollector.clear();
 
 		// first arrival
-        simulationModel.planNextArrival();
+		simulationModel.planNextArrival();
 
-        while (simulationGoesOn) {
-            // extract the upcoming event and process
-            Event e = eventQueue.pop();
+		while (simulationGoesOn) {
+			// extract the upcoming event and process
+			Event e = eventQueue.pop();
 
-            // plan next arrival if got into the entire queueing network
-            if (
-            		e.getType() == EventType.ARRIVAL && 
-            		e.getTime() == e.getJob().getArrivalTime()) {
+			// plan next arrival if got into the entire queueing network
+			if (
+					e.getType() == EventType.ARRIVAL && 
+					e.getTime() == e.getJob().getArrivalTime()) {
 
-            	simulationModel.planNextArrival();
-            }
+				simulationModel.planNextArrival();
+			}
 
-            // process popped event
-            simulationModel.processEvent(e);
-        }
+			// process popped event
+			simulationModel.processEvent(e);
+		}
 	}
 
 	public StatCollector getStatCollector() {

@@ -87,7 +87,7 @@ public final class BatchCollector {
 		addBatchStats(centerName, batchInfo, stats);
 	}
 
-    private void addBatchStats(String centerName, PerCenterBatchInfo batchInfo, StatCollector stats) {
+	private void addBatchStats(String centerName, PerCenterBatchInfo batchInfo, StatCollector stats) {
 
 		batchInfo.jobCount++;
 
@@ -95,30 +95,30 @@ public final class BatchCollector {
 			return;
 		}
 
-        // save Population-Based metrics
-        // stats.getPopulationStats() return Map<String, PopulationStat>
-        stats.getPopulationStats().forEach((key, popStat) -> {
-        	if(key.contains(centerName)) {
-        		currentBatch.put(key, Double.valueOf(popStat.calculateMean()));
+		// save Population-Based metrics
+		// stats.getPopulationStats() return Map<String, PopulationStat>
+		stats.getPopulationStats().forEach((key, popStat) -> {
+			if(key.contains(centerName)) {
+				currentBatch.put(key, Double.valueOf(popStat.calculateMean()));
 				popStat.reset();
-        	}
-        });
+			}
+		});
 
-        // save Time-Based metrics
-        // stats.getTimeStats() return Map<String, TimeStat>
-        stats.getTimeStats().forEach((key, timeStat) -> {
-        	if(key.contains(centerName)) {
-        		currentBatch.put(key, Double.valueOf(timeStat.calculateMean()));
+		// save Time-Based metrics
+		// stats.getTimeStats() return Map<String, TimeStat>
+		stats.getTimeStats().forEach((key, timeStat) -> {
+			if(key.contains(centerName)) {
+				currentBatch.put(key, Double.valueOf(timeStat.calculateMean()));
 				timeStat.reset();
-        	}
-        });
+			}
+		});
 
 		saveBatchAndClean(batchInfo);
 
 		if(areAllCentersDone()) {
 			onAllKBatchesDoneCallback.onDone(this);
 		}
-    }
+	}
 
 	private void saveBatchAndClean(PerCenterBatchInfo batchInfo) {
 		currentBatch.forEach((batchKey, batchValue) -> {
@@ -142,55 +142,27 @@ public final class BatchCollector {
 		return true; // all finish
 	}
 
-    private boolean isWarmingUp(double nowtime) {
-    	return timeWarmup != 0 && nowtime < timeWarmup;
-    }
-
-    private boolean addFullBatch(PerCenterBatchInfo batchInfo) {
-    	boolean needsToContinue = false;
-
-    	for(final String centerNameKey : perCenterBatchInfo.keySet()) {
-    		if(perCenterBatchInfo.get(centerNameKey).batchesCount < k) {
-    			needsToContinue = true;
-    			break;
-    		}
-    	}
-
-    	if(!needsToContinue) {
-    		return false;
-    	}
-
-    	if(batchInfo.batchesCount == k) {
-    		return true;
-    	}
-
-    	currentBatch.forEach((batchKey, batchValue) -> {
-    		batchMeans.putIfAbsent(batchKey, new ArrayList<>());
-    		batchMeans.get(batchKey).add(batchValue);
-    	});
-
-    	batchInfo.batchesCount++;
-
-    	return true;
-    }
+	private boolean isWarmingUp(double nowtime) {
+		return timeWarmup != 0 && nowtime < timeWarmup;
+	}
 
 	public int getB() {
 		return b;
 	}
 
 	public int getK() {
-    	return k;
-    }
+		return k;
+	}
 
-    public Map<String, List<Double>> getBatchMeans() {
-        return batchMeans;
-    }
+	public Map<String, List<Double>> getBatchMeans() {
+		return batchMeans;
+	}
 
-    public void clear() {
-    	currentBatch.clear();
-    	batchMeans.clear();
-    	initZeroPerCenterBatchInfo();
-    }
+	public void clear() {
+		currentBatch.clear();
+		batchMeans.clear();
+		initZeroPerCenterBatchInfo();
+	}
 
 	// calculate mean of the means of batches
 	public double getBatchGrandMean(String key) {
@@ -201,9 +173,10 @@ public final class BatchCollector {
 		}
 
 		double sum = 0.0;
-		for (Double v : values) {
+		for (final Double v : values) {
 			sum += v;
 		}
+
 		return sum / values.size();
 	}
 }

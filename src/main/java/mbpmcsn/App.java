@@ -30,13 +30,15 @@ public class App {
 			System.out.println("----------------------------------------------");
 			System.out.println("1. FINITE HORIZON (Replicazioni Indipendenti)");
 
-			System.out.println("2. INFINITE HORIZON (Batch Means)");
+			System.out.println("2. INFINITE HORIZON (Batch Means, double med mean time)");
 
-			System.out.println("3. VERIFICATION");
+			System.out.println("3. VERIFICATION (double med mean time)");
 
-			System.out.println("4. TRANSIENT ANALYSIS");
+			System.out.println("4. TRANSIENT ANALYSIS (double med mean time)");
 
-			System.out.println("5. Esci");
+			System.out.println("5. TRANSIENT ANALYSIS");
+
+			System.out.println("6. Esci");
 			System.out.println("----------------------------------------------");
 			System.out.print("> Scelta: ");
 
@@ -59,18 +61,18 @@ public class App {
 						break;
 
 					case 2:
-						System.out.println("\n[INFO] Avvio Infinite Horizon Experiment (Batch Means)...");
+						System.out.println("\n[INFO] Avvio Infinite Horizon Experiment (Batch Means, double med mean time)...");
 						runner = new SteadyStateRunner(
 								"steady-state-doublemedmeantime",
 								new BaseSimulationModelBuilder(),
-								true,
+								false,
 								Constants.ARRIVAL_MED_MEAN_TIME * 2,
 								Constants.TIME_WARMUP);
 						break;
 
 					case 3:
-                        System.out.println("\n[INFO] Avvio Verification (M/M/k vs Simulation)...");
-						System.out.println("[INFO] Nota: La durata è determinata dal raggiungimento dei Batch (k=96).");
+						System.out.println("\n[INFO] Avvio Verification (M/M/k vs Simulation)...");
+						System.out.println("[INFO] Nota: La durata è determinata dal raggiungimento dei Batch (k=96, double med mean time).");
 						runner = new VerificationRunner(
 								"verification-doublemedmeantime",
 								new BaseSimulationModelBuilder(),
@@ -79,7 +81,7 @@ public class App {
 						break;
 
 					case 4:
-						System.out.println("\n[INFO] Avvio Analisi del Transitorio...");
+						System.out.println("\n[INFO] Avvio Analisi del Transitorio (double med mean time)...");
 						runner = new FiniteHorizonRunner(
 								"transient-analysis-doublemedmeantime",
 								new BaseSimulationModelBuilder(),
@@ -87,16 +89,20 @@ public class App {
 								false,
 								Constants.ARRIVAL_MED_MEAN_TIME * 2,
 								Constants.TRANSIENT_SAMPLING_INTERVAL);
-						/* runner = new FiniteHorizonRunner(
+						break;
+
+					case 5:
+						System.out.println("\n[INFO] Avvio Analisi del Transitorio...");
+						runner = new FiniteHorizonRunner(
 								"transient-analysis-medmeantime",
 								new BaseSimulationModelBuilder(),
 								Constants.TRANSIENT_DURATION,
 								false,
 								Constants.ARRIVAL_MED_MEAN_TIME,
 								Constants.TRANSIENT_SAMPLING_INTERVAL);
-						break; */
+						break;
 
-					case 5:
+					case 6:
 						System.out.println("Uscita.");
 						exit = true;
 						break;

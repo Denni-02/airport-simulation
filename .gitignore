@@ -219,24 +219,3 @@ local.properties
 .settings/
 
 # Project output files
-output/*
-!output/finite-horizon-workday-medmeantime/
-output/finite-horizon-workday-medmeantime/*
-!output/finite-horizon-workday-medmeantime/plot/
-!output/finite-horizon-workday-medmeantime/tables/
-
-!output/transient-analysis-doublemedmeantime/
-output/transient-analysis-doublemedmeantime/*
-!output/transient-analysis-doublemedmeantime/plot/
-
-!output/transient-analysis-medmeantime/
-output/transient-analysis-medmeantime/*
-!output/transient-analysis-medmeantime/plot/
-
-!output/steady-state-doublemedmeantime/
-output/steady-state-doublemedmeantime/*
-!output/steady-state-doublemedmeantime/plot/
-
-!output/verification-doublemedmeantime/
-output/verification-doublemedmeantime/*
-!output/verification-doublemedmeantime/plot/

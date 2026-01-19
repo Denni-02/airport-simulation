@@ -62,7 +62,9 @@ public final class IntervalEstimationRow {
 	}
 
 	@CsvColumn(order = 6, name = "Autocorr")
-	public double getAutocorrelation() { return autocorrelation; }
+	public double getAutocorrelation() { 
+		return autocorrelation; 
+	}
 
 	@Override
 	public String toString() {
