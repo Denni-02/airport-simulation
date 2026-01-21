@@ -74,7 +74,7 @@ public class App {
 						System.out.println("\n[INFO] Avvio Verification (M/M/k vs Simulation)...");
 						System.out.println("[INFO] Nota: La durata è determinata dal raggiungimento dei Batch (k=96, double med mean time).");
 						runner = new VerificationRunner(
-								"verification-doubleMedMeanTime",
+								"verification-base-doubleMedMeanTime",
 								new BaseSimulationModelBuilder(),
 								Constants.ARRIVAL_MED_MEAN_TIME * 2
 						);
