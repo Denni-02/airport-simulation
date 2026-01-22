@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-# Lancia con py scripts/plot_result_finite_horizon.py output/finite-horizon-workday/runs-samples/run-0/sample.csv
+# Lancia con py scripts/plot_result_finite_horizon.py output/finite-horizon-workday-base-medMeanTime/runs-samples/run-0/sample.csv
 
 def generate_plots(csv_file_path):
     if not os.path.exists(csv_file_path):

@@ -97,6 +97,7 @@ public final class FiniteHorizonRunner implements Runner {
 			// GESTIONE OUTPUT DETTAGLIATO (SOLO RUN 1)
 			if (i == 0) {
 				printPilotRunDiagnostic(stats, samples);
+				printValidationCheck(stats); // PER CAPITOLO 7. VALIDAZIONE
 				System.out.println("\n... Esecuzione delle restanti " + (NUM_REPLICATIONS - 1) + " replicazioni in background ...");
 			}
 		}
@@ -214,5 +215,66 @@ public final class FiniteHorizonRunner implements Runner {
 				throw new RuntimeException(e);
 			}
 		}
+	}
+
+	// NUOVO METODO PER IL CAPITOLO 7 (VALIDAZIONE)
+	private void printValidationCheck(StatCollector stats) {
+		System.out.println("\n");
+		System.out.println("####################################################################");
+		System.out.println("#  SEZIONE 1-BIS: VALIDAZIONE PROBABILITA' E FLUSSI (RUN #1)       #");
+		System.out.println("####################################################################");
+
+		// 1. Recupero la mappa delle statistiche "Population" (dove ci sono i conteggi)
+		var popStats = stats.getPopulationStats();
+
+		// 2. Recupero i conteggi in modo sicuro (controllando se la chiave esiste)
+
+		long totalProcessed = 0;
+		if (popStats.containsKey("SystemResponseTime_Success")) {
+			totalProcessed = popStats.get("SystemResponseTime_Success").getCount();
+		}
+
+		long passCheckIn = 0;
+		if (popStats.containsKey("Ts_CheckIn")) {
+			passCheckIn = popStats.get("Ts_CheckIn").getCount();
+		}
+
+		long passXRay = 0;
+		if (popStats.containsKey("Ts_XRay")) {
+			passXRay = popStats.get("Ts_XRay").getCount();
+		}
+
+		long passTrace = 0;
+		if (popStats.containsKey("Ts_TraceDetection")) {
+			passTrace = popStats.get("Ts_TraceDetection").getCount();
+		}
+
+		// 3. Calcolo Percentuali
+		double pDeskSimulata = 0.0;
+		if (totalProcessed > 0) {
+			// Calcolo percentuale su totale uscite
+			pDeskSimulata = (double) passCheckIn / totalProcessed * 100.0;
+		}
+
+		double pCheckSimulata = 0.0;
+		if (passXRay > 0) {
+			// Calcolo percentuale su transiti XRay
+			pCheckSimulata = (double) passTrace / passXRay * 100.0;
+		}
+
+		// 4. Stampa Report
+		System.out.printf("Totale Passeggeri Processati (OUT): %d\n", totalProcessed);
+		System.out.println("--------------------------------------------------------------------");
+
+		System.out.println(">>> CHECK 1: Probabilità Check-In (Target: ~38.7%)");
+		System.out.printf("    Transiti Check-In:    %d\n", passCheckIn);
+		System.out.printf("    Percentuale Simulata: %.4f%%\n", pDeskSimulata);
+
+		System.out.println("\n>>> CHECK 2: Probabilità Trace Detection (Target: ~10.0%)");
+		System.out.printf("    Transiti X-Ray:       %d\n", passXRay);
+		System.out.printf("    Transiti Trace Det.:  %d\n", passTrace);
+		System.out.printf("    Percentuale Simulata: %.4f%%\n", pCheckSimulata);
+
+		System.out.println("####################################################################");
 	}
 }
