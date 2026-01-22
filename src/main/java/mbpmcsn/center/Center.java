@@ -47,6 +47,36 @@ public abstract class Center {
 	// --- STATE VARIABLES ---
 	protected long numJobsInNode; // current number of jobs in this center
 	protected double lastUpdateTime; // timestamp of the last state change
+									 //
+	public enum KeyStatPrefix {
+		TSYSTEM("Ts_", "Response time"),
+		TQUEUE("Tq_", "Queue time"),
+		NSYSTEM("Ns_", "Num in center"),
+		NQUEUE("Nq_", "Num in queue"),
+		UTILIZATION("X_", "Utilization"),
+		SERVICE("S_", "Service time");
+
+		private final String label;
+		private final String prettyName;
+
+		private KeyStatPrefix(String label, String prettyName) {
+			this.label = label;
+			this.prettyName = prettyName;
+		}
+
+		@Override
+		public String toString() {
+			return label;
+		}
+
+		public String getPrettyName() {
+			return prettyName;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+	};
 
 	protected Center(
 			int id, 
@@ -65,12 +95,12 @@ public abstract class Center {
 		this.sampleCollector = sampleCollector;
 		this.batchCollector = batchCollector;
 
-		statTsKey = "Ts_" + name;
-		statTqKey = "Tq_" + name;
-		statSKey = "S_" + name;
-		statNsKey = "Ns_" + name;
-		statNqKey = "Nq_" + name;
-		statXKey = "X_" + name;
+		statTsKey = KeyStatPrefix.TSYSTEM + name;
+		statTqKey = KeyStatPrefix.TQUEUE + name;
+		statSKey = KeyStatPrefix.SERVICE + name;
+		statNsKey = KeyStatPrefix.NSYSTEM + name;
+		statNqKey = KeyStatPrefix.NQUEUE + name;
+		statXKey = KeyStatPrefix.UTILIZATION + name;
 
 		if(statCollector == null) {
 			throw new IllegalArgumentException(

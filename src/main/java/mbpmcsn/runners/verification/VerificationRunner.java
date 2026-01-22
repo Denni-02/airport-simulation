@@ -8,6 +8,8 @@ import mbpmcsn.runners.Runner;
 import mbpmcsn.runners.smbuilders.SimulationModelBuilder;
 import mbpmcsn.runners.steadystate.VeryLongRun;
 import mbpmcsn.stats.batchmeans.BatchCollector;
+import mbpmcsn.center.Center.KeyStatPrefix;
+import mbpmcsn.stats.ie.IntervalEstimationRow;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +67,7 @@ public class VerificationRunner implements Runner {
 
 		// --- VERIFICA CENTRO 1: Check-In (M/M/k) ---
 		double lambdaCheckIn = lambdaTot * Constants.P_DESK;
-		verifyMMkNode("CheckIn", batchCollector, lambdaTot * Constants.P_DESK, Constants.M1, Constants.MEAN_S1, "M/M/" + Constants.M1);
+		verifyMMkNode("CheckIn", batchCollector, lambdaCheckIn, Constants.M1, Constants.MEAN_S1, "M/M/" + Constants.M1);
 
 		// --- VERIFICA CENTRO 2: Varchi (M/M/k) ---
 		verifyMMkNode("Varchi", batchCollector, lambdaTot, Constants.M2, Constants.MEAN_S2, "M/M/" + Constants.M2);
@@ -75,12 +77,12 @@ public class VerificationRunner implements Runner {
 
 		// --- VERIFICA CENTRO 4: Trace Detection (M/M/k) ---
 		double lambdaTrace = lambdaTot * Constants.P_CHECK;
-		verifyMMkNode("TraceDetection", batchCollector, lambdaTot * Constants.P_CHECK, Constants.M4, Constants.MEAN_S4, "M/M/" + Constants.M4);
+		verifyMMkNode("TraceDetection", batchCollector, lambdaTrace, Constants.M4, Constants.MEAN_S4, "M/M/" + Constants.M4);
 
 		// --- VERIFICA CENTRO 5: Recupero (M/M/inf) ---
 		verifyInfiniteServer("Recupero", batchCollector, Constants.MEAN_S5);
 
-		saveVerificationReport();
+		//saveVerificationReport();
 	}
 
 	/*
@@ -114,8 +116,12 @@ public class VerificationRunner implements Runner {
 		double E_Tq = pq / (k * mu - lambda);
 		double E_Ts_Theor = E_Tq + meanService;
 
-		//compareAndPrint(name, collector, rho, E_Ts_Theor);
-		compareAndRecord(name, modelName, collector, rho, E_Ts_Theor);
+		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
+		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.TQUEUE, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.NQUEUE, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.UTILIZATION, name, modelName, ierows, E_Ts_Theor);
 	}
 
 	/**
@@ -141,8 +147,12 @@ public class VerificationRunner implements Runner {
 		// E[Ts] = 1 / (mu - lambda)
 		double E_Ts_Theor = 1.0 / (mu - lambdaSingle);
 
-		//compareAndPrint(name, collector, rho, E_Ts_Theor);
-		compareAndRecord(name, modelName, collector, rho, E_Ts_Theor);
+		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
+		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.TQUEUE, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.NQUEUE, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.UTILIZATION, name, modelName, ierows, E_Ts_Theor);
 	}
 
 	/**
@@ -155,8 +165,11 @@ public class VerificationRunner implements Runner {
 
 		// Non c'è stabilità da controllare (rho è sempre 0 per definizione)
 		// Il tempo di risposta è puramente il tempo di servizio
-		//compareAndPrint(name, collector, 0.0, meanService);
-		compareAndRecord(name, modelName, collector, 0.0, meanService);
+		//
+
+		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
+		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, meanService);
+		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, meanService);
 	}
 
 	private boolean checkInstability(double rho) {
@@ -169,40 +182,36 @@ public class VerificationRunner implements Runner {
 		return false;
 	}
 
-	/*private void compareAndPrint(String name, BatchCollector collector, double rho, double expectedVal) {
-		// Recupero il valore simulato (Media Globale accumulata)
-		double simulatedVal = collector.getBatchGrandMean("Ts_" + name);
-
-		double error = Math.abs(simulatedVal - expectedVal) / expectedVal * 100.0;
-
-		System.out.printf("    Utilizzo (Rho)   : %.4f\n", rho);
-		System.out.printf("    E[Ts] Teorico    : %.4f s\n", expectedVal);
-		System.out.printf("    E[Ts] Simulato   : %.4f s\n", simulatedVal);
-
-		if (error < 5.0) {
-			System.out.printf("    [OK] Verifica Superata (Errore: %.2f%%)\n", error);
-		} else {
-			System.out.printf("    [WARNING] Errore alto (%.2f%%). Aumentare durata?\n", error);
-		}
-	}*/
-
-	private void compareAndRecord(String name, String modelName, BatchCollector collector, double rho, double expectedVal) {
-
-		double simulatedVal = collector.getBatchGrandMean("Ts_" + name);
-
-		double error = Math.abs(simulatedVal - expectedVal) / expectedVal * 100.0;
-
-
-		String status = (error < 5.0) ? "OK" : "WARNING";
-
-		// Stampa a video
-		System.out.printf("    Rho: %.4f | Teor: %.2f s | Sim: %.2f s | Err: %.2f%% -> [%s]\n",
-				rho, expectedVal, simulatedVal, error, status);
-
-		// Aggiunge alla lista per il CSV
-		results.add(new VerificationResultRow(name, modelName, rho, expectedVal, simulatedVal, error, status));
+	private boolean checkIfWithinInterval(IntervalEstimationRow ierow, double val) {
+		return ierow.getMin() <= val && val <= ierow.getMax();
 	}
 
+	private void compareAndRecord(
+			KeyStatPrefix keyStatPrefix,
+			String name,
+			String modelName,
+			List<IntervalEstimationRow> ierows,
+			double expectedVal) {
+
+		IntervalEstimationRow ie = null;
+
+		for(final IntervalEstimationRow ierow : ierows) {
+			if(ierow.getMetric().equals(keyStatPrefix + name)) {
+				ie = ierow;
+				break;
+			}
+		}
+
+		if(ie == null) {
+			throw new IllegalArgumentException("cannot find an interval estimation result for: " + keyStatPrefix + name);
+		}
+
+		boolean withinInterval = checkIfWithinInterval(ie, expectedVal);
+
+		System.out.printf("    %s | SimMean: %.4f | SimMin: %.4f | SimMax: %.4f | SimWidth: %.20f | TheoMean: %.4f => %s\n",
+				keyStatPrefix.getPrettyName(), ie.getMean(), ie.getMin(), ie.getMax(), ie.getWidth(), 
+				expectedVal, withinInterval ? "is within interval" : "is NOT within interval");
+	}
 
 	private void saveVerificationReport() {
 		String path = "output/" + experimentName + "/verification_report.csv";
