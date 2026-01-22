@@ -80,7 +80,7 @@ public class VerificationRunner implements Runner {
 		verifyMMkNode("TraceDetection", batchCollector, lambdaTrace, Constants.M4, Constants.MEAN_S4, "M/M/" + Constants.M4);
 
 		// --- VERIFICA CENTRO 5: Recupero (M/M/inf) ---
-		verifyInfiniteServer("Recupero", batchCollector, Constants.MEAN_S5);
+		verifyInfiniteServer("Recupero", lambdaTot, batchCollector, Constants.MEAN_S5);
 
 		saveVerificationReport();
 	}
@@ -114,14 +114,16 @@ public class VerificationRunner implements Runner {
 
 		// Tempi medi
 		double E_Tq = pq / (k * mu - lambda);
-		double E_Ts_Theor = E_Tq + meanService;
+		double E_Ts = E_Tq + meanService;
+		double E_Nq = lambda * E_Tq;
+		double E_Ns = lambda * E_Ts;
 
 		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
-		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.TQUEUE, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.NQUEUE, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.UTILIZATION, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts);
+		compareAndRecord(KeyStatPrefix.TQUEUE, name, modelName, ierows, E_Tq);
+		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, E_Ns);
+		compareAndRecord(KeyStatPrefix.NQUEUE, name, modelName, ierows, E_Nq);
+		compareAndRecord(KeyStatPrefix.UTILIZATION, name, modelName, ierows, rho);
 	}
 
 	/**
@@ -144,32 +146,36 @@ public class VerificationRunner implements Runner {
 		}
 
 		// Formula esatta M/M/1 per il Tempo di Risposta (Wait + Service)
-		// E[Ts] = 1 / (mu - lambda)
-		double E_Ts_Theor = 1.0 / (mu - lambdaSingle);
+		double E_Ts = 1.0 / (mu - lambdaSingle);
+		double E_Tq = (rho * meanService) / (mu - lambdaSingle);
+		double E_Nq = lambdaTot * E_Tq;
+		double E_Ns = lambdaTot * E_Ts;
 
 		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
-		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.TQUEUE, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.NQUEUE, name, modelName, ierows, E_Ts_Theor);
-		compareAndRecord(KeyStatPrefix.UTILIZATION, name, modelName, ierows, E_Ts_Theor);
+		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts);
+		compareAndRecord(KeyStatPrefix.TQUEUE, name, modelName, ierows, E_Tq);
+		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, E_Ns);
+		compareAndRecord(KeyStatPrefix.NQUEUE, name, modelName, ierows, E_Nq);
+		compareAndRecord(KeyStatPrefix.UTILIZATION, name, modelName, ierows, rho);
 	}
 
 	/**
 	 * Verifica specifica per nodi M/M/infinito (Infinite Server)
 	 * In questi nodi non esiste coda (Tq = 0), quindi Ts = S
 	 */
-	private void verifyInfiniteServer(String name, BatchCollector collector, double meanService) {
+	private void verifyInfiniteServer(String name, double lambda, BatchCollector collector, double meanService) {
 		String modelName = "M/M/inf";
 		System.out.printf("\n>>> Centro: %-15s [M/M/inf] (Delay)\n", name);
 
 		// Non c'è stabilità da controllare (rho è sempre 0 per definizione)
 		// Il tempo di risposta è puramente il tempo di servizio
-		//
+
+		double E_Ts = meanService;
+		double E_Ns = E_Ts / lambda;
 
 		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
-		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, meanService);
-		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, meanService);
+		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts);
+		compareAndRecord(KeyStatPrefix.NSYSTEM, name, modelName, ierows, E_Ns);
 	}
 
 	private boolean checkInstability(double rho) {
