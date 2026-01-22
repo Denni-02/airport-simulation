@@ -147,9 +147,9 @@ public class VerificationRunner implements Runner {
 
 		// Formula esatta M/M/1 per il Tempo di Risposta (Wait + Service)
 		double E_Ts = 1.0 / (mu - lambdaSingle);
-		double E_Tq = (rho * meanService) / (mu - lambdaSingle);
-		double E_Nq = lambdaTot * E_Tq;
-		double E_Ns = lambdaTot * E_Ts;
+		double E_Tq = (rho * meanService) / (1 - rho);
+		double E_Nq = lambdaSingle * E_Tq;
+		double E_Ns = lambdaSingle * E_Ts;
 
 		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
 		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts);
@@ -171,7 +171,7 @@ public class VerificationRunner implements Runner {
 		// Il tempo di risposta è puramente il tempo di servizio
 
 		double E_Ts = meanService;
-		double E_Ns = E_Ts / lambda;
+		double E_Ns = lambda * E_Ts;
 
 		List<IntervalEstimationRow> ierows = IntervalEstimationRow.fromMapOfData(collector.getBatchMeans());
 		compareAndRecord(KeyStatPrefix.TSYSTEM, name, modelName, ierows, E_Ts);
