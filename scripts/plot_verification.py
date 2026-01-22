@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import os
 
-# Lancia con py scripts/plot_verification.py output/verification-doubleMedMeanTime/verification_report.csv
+# Lancia con py scripts/plot_verification.py output/verification-base-doubleMedMeanTime/verification_report.csv
 
 def plot_verification(csv_path):
     if not os.path.exists(csv_path):

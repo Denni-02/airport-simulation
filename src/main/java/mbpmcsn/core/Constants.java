@@ -65,30 +65,30 @@ public final class Constants {
     public static final int M1 = 8; // numero server centro 1
     public static final double MEAN_S1 = 105.0;
     public static final double STD_S1 = 35.0;
-    public static final double LB1 = 60.0;
+    public static final double LB1 = 50.0;
     public static final double UB1 = 150.0;
     // --- Center 2: Varchi Elettronici (MSMQ), Truncated Normal
     public static final int M2 = 4; // numero server centro 2
     public static final double MEAN_S2 = 12;
-    public static final double STD_S2 = 4;
-    public static final double LB2 = 10.0;
+    public static final double STD_S2 = 6;
+    public static final double LB2 = 6.0;
     public static final double UB2 = 24;
-    // --- Center 3: Controlli a Raggi X (MSMQ), Erlang-k (k=3)
+    // --- Center 3: Controlli a Raggi X (MSMQ), Truncated Normal
     public static final int M3 = 6; // numero server centro 4
     public static final double MEAN_S3 = 45;
     public static final double STD_S3 = 25.0;
     public static final double LB3 = 20.0;
-    public static final double UB3 = 90;
+    public static final double UB3 = 95;
     // --- Center 4: Trace Detection (SSQ), Truncated Normal ---
 	public static final int M4 = 1;
     public static final double MEAN_S4 = 60.0;
     public static final double STD_S4 = 20.0;
     public static final double LB4 = 30.0;
-    public static final double UB4 = 100;
+    public static final double UB4 = 80;
     // --- Center 5: Recupero Oggetti Utente (IS), Truncated Normal ---
     public static final double MEAN_S5 = 120.0;
-    public static final double STD_S5 = 40.0;
+    public static final double STD_S5 = 30.0;
     public static final double LB5 = 60.0;
-    public static final double UB5 = 340.0;
+    public static final double UB5 = 180.0;
 
 }
