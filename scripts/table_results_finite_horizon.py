@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-# Lancia py scripts/table_results.py output/finite-horizon-workday-base-medMeanTime/population-ie.csv
-# E poi py scripts/table_results.py output/finite-horizon-workday-base-medMeanTime/time-ie.csv
+# Lancia py scripts/table_results_finite_horizon.py output/finite-horizon-workday-base-medMeanTime/population-ie.csv
+# E poi py scripts/table_results_finite_horizon.py output/finite-horizon-workday-base-medMeanTime/time-ie.csv
 
 def generate_tables(csv_file_path):
     if not os.path.exists(csv_file_path):
