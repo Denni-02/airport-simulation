@@ -63,8 +63,8 @@ public final class Constants {
     public static final double P_STANDARD = 0.9; // Salta Trace Detection
     public static final double P_FAIL = 0.0001; // Espulso dal sistema
     public static final double P_SUCCESS = 0.9999; // Supera controlli sicurezza
-    public static final double P_FAST_TRACK = 0.30;
-    public static final double P_SLOW_PATH = 0.70;
+    public static final double P_FAST_TRACK = 0.25;
+    public static final double P_SLOW_PATH = 0.75;
 
     // --- Center 1: Banchi Accettazione (MSSQ), Truncated Normal
     public static final int M1 = 8; // numero server centro 1
@@ -85,20 +85,20 @@ public final class Constants {
     public static final double LB3 = 30.0;
     public static final double UB3 = 70;
     // --- Center 4: Trace Detection (SSQ), Truncated Normal ---
-	public static final int M4 = 1;
+	public static final int M4 = 2;
     public static final double MEAN_S4 = 60.0;
     public static final double STD_S4 = 20.0;
     public static final double LB4 = 30.0;
-    public static final double UB4 = 90;
+    public static final double UB4 = 90.0;
     // --- Center 5: Recupero Oggetti Utente (IS), Truncated Normal ---
     public static final double MEAN_S5 = 120.0;
     public static final double STD_S5 = 30.0;
     public static final double LB5 = 60.0;
     public static final double UB5 = 180.0;
     // --- Center 6: Fast Track (SSQ), Truncated Normal  ---
-    public static final int M6 = 1; // Numero server Fast Track
-    public static final double MEAN_S6 = 60.0;
+    public static final int M6 = 2; // Numero server Fast Track
+    public static final double MEAN_S6 = 45.0;
     public static final double STD_S6 = 30.0;
     public static final double LB6 = 30.0;
-    public static final double UB6 = 70.0;
+    public static final double UB6 = 60.0;
 }

@@ -111,14 +111,15 @@ public final class ImprovedSimulationModel extends SimulationModel {
 		// 4. Trace Detection
 		ServiceProcess sp4 = new ServiceProcess(rvgTrace, rngs, STREAM_S4_SERVICE);
 		NetworkRoutingPoint routingTrace = new TraceRouting(centerRecupero, STREAM_S4_ROUTING);
-		centerTrace = new SingleServerSingleQueue(
+		centerTrace = new MultiServerSingleQueue(
 				ID_TRACE_DETECTION ,
 				"TraceDetection",
 				sp4,
 				routingTrace,
 				statCollector,
 				sampleCollector,
-				batchCollector
+				batchCollector,
+				M4
 				);
 
 		NetworkRoutingPoint routingSecurityExit = new XRayRouting(centerTrace, centerRecupero, STREAM_S3_ROUTING);
@@ -138,14 +139,15 @@ public final class ImprovedSimulationModel extends SimulationModel {
 
 		// --- 6. Fast Track ---
 		ServiceProcess sp6 = new ServiceProcess(rvgFastTrack, rngs, STREAM_S6_SERVICE);
-		fastTrack = new SingleServerSingleQueue(
+		fastTrack = new MultiServerSingleQueue(
 				ID_FAST_TRACK,
 				"FastTrack",
 				sp6,
 				routingSecurityExit, // Converge nello stesso punto di XRay
 				statCollector,
 				sampleCollector,
-				batchCollector
+				batchCollector,
+				M6
 				);
 
 		// --- 2. Varchi Elettronici ---
